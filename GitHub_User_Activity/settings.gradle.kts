@@ -1,0 +1,1 @@
+rootProject.name = "GitHub_User_Activity"
