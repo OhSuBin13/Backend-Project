@@ -1,0 +1,12 @@
+{
+  "name": "task-cli",
+  "version": "1.0.0",
+  "description": "Simple task tracker CLI",
+  "bin": {
+    "task-cli": "./app.js"
+  },
+  "scripts": {
+    "task-cli": "node app.js"
+  },
+  "license": "MIT"
+}
