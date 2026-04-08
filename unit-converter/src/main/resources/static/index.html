@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Unit Converter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="convertForms">
+    <h2>Unit Converter</h2>
+    <div class="buttons">
+        <div id="length-button" class="button active">Length</div>
+        <div id="weight-button" class="button">Weight</div>
+        <div id="temperature-button" class="button">Temperature</div>
+    </div>
+
+    <form id="length-form" class="convertForm">
+        <p>
+            <label for="length-value">Enter Length</label>
+            <input type="text" name="value" id="length-value">
+        </p>
+
+        <p>
+            <label for="length-from">From</label>
+            <select name="from" id="length-from">
+                <option value="">---Select---</option>
+                <option value="mm">millimeter</option>
+                <option value="cm">centimeter</option>
+                <option value="m">meter</option>
+                <option value="km">kilometer</option>
+                <option value="in">inch</option>
+                <option value="ft">foot</option>
+                <option value="yd">yard</option>
+                <option value="mi">mile</option>
+            </select>
+        </p>
+
+        <p>
+            <label for="length-to">To</label>
+            <select name="to" id="length-to">
+                <option value="">---Select---</option>
+                <option value="mm">millimeter</option>
+                <option value="cm">centimeter</option>
+                <option value="m">meter</option>
+                <option value="km">kilometer</option>
+                <option value="in">inch</option>
+                <option value="ft">foot</option>
+                <option value="yd">yard</option>
+                <option value="mi">mile</option>
+            </select>
+        </p>
+
+        <button type="submit" class="submitButton" id="length-submit-button">Convert</button>
+    </form>
+
+    <form id="weight-form" class="convertForm">
+        <p>
+            <label for="length-value">Enter Weight</label>
+            <input type="text" name="value" id="weight-value">
+        </p>
+
+        <p>
+            <label for="weight-from">From</label>
+            <select name="from" id="weight-from">
+                <option value="">---Select---</option>
+                <option value="mg">milligram</option>
+                <option value="g">gram</option>
+                <option value="kg">kilogram</option>
+                <option value="oz">ounce</option>
+                <option value="lb">pound</option>
+            </select>
+        </p>
+
+        <p>
+            <label for="weight-to">To</label>
+            <select name="to" id="weight-to">
+                <option value="">---Select---</option>
+                <option value="mg">milligram</option>
+                <option value="g">gram</option>
+                <option value="kg">kilogram</option>
+                <option value="oz">ounce</option>
+                <option value="lb">pound</option>
+            </select>
+        </p>
+
+        <button type="submit" class="submitButton" id="weight-submit-button">Convert</button>
+    </form>
+
+    <form id="temperature-form" class="convertForm" >
+        <p>
+            <label for="length-value">Enter Temperature</label>
+            <input type="text" name="value" id="temperature-value">
+        </p>
+
+        <p>
+            <label for="length-from">From</label>
+            <select name="from" id="temperature-from">
+                <option value="">---Select---</option>
+                <option value="C">celsius</option>
+                <option value="F">fahrenheit</option>
+                <option value="K">kelvin</option>
+            </select>
+        </p>
+
+        <p>
+            <label for="length-to">To</label>
+            <select name="to" id="temperature-to">
+                <option value="">---Select---</option>
+                <option value="C">celsius</option>
+                <option value="F">fahrenheit</option>
+                <option value="K">kelvin</option>
+            </select>
+        </p>
+
+        <button type="submit" class="submitButton" id="temperature-submit-button">Convert</button>
+    </form>
+</div>
+
+<div id="resultForm" class="result" hidden>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

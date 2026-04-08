@@ -1,0 +1,101 @@
+*{
+
+    margin: 0;
+    padding: 0;
+}
+
+body{
+    background-color: #f4f4f4;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+h2{
+
+    padding: 0;
+    margin: 0;
+}
+
+.buttons{
+
+    display: flex;
+    gap: 10px;
+}
+
+.button{
+
+    padding: 5px;
+}
+.button:hover{
+
+    color: deepskyblue;
+    cursor: pointer;
+}
+
+.active{
+
+    color: cornflowerblue;
+    text-decoration: underline;
+}
+
+.convertForms{
+
+    width: 50%;
+    margin: auto;
+    margin-top: 10%;
+    background-color: white;
+    padding: 10px;
+    border-radius: 15px;
+}
+
+.result{
+
+    width: 50%;
+    margin: auto;
+    margin-top: 5px;
+    background-color: white;
+    padding: 10px;
+    border-radius: 15px;
+    font-size: 25px;
+}
+
+.convertForm{
+
+    gap: 10px;
+}
+
+.convertForm p{
+    width: 100%;
+}
+
+input{
+
+    padding: 10px;
+    width: 80%;
+}
+
+select{
+
+    padding: 10px;
+    width: 100%;
+}
+
+.submitButton{
+
+    padding: 7px;
+    border: none;
+    border-radius: 5px;
+    width: 100%;
+}
+
+.submitButton:hover{
+
+    cursor: pointer;
+    background-color: #e1e1e1;
+}
+
+#weight-form{
+    display: none;
+}
+#temperature-form{
+    display: none;
+}
