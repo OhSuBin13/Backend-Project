@@ -6,7 +6,7 @@ export default function Article() {
   const [article, setArticle] = useState();
   useEffect(() => {
     async function fetchdata() {
-      const result = await fetch(`http:localhost:3000/api/articles/${id}`);
+      const result = await fetch(`http://localhost:3000/api/articles/${id}`);
       const res = await result.json();
       setArticle(res);
     }

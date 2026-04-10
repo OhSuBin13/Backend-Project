@@ -16,7 +16,7 @@ export default function Home() {
         }
         const data = await response.json();
         console.log(response);
-        setArticles(data);
+        setArticles(data.articles);
       } catch (error) {
         console.error("Error fetching articles:", error);
       }
@@ -41,7 +41,7 @@ export default function Home() {
             key={index}
             className="border-2 border-gray-200 p-2 m-2 flex justify-between items-center cursor-pointer"
             onClick={() => {
-              navigate(`/articles/${article.id}`);
+              navigate(`/Article/${article.id}`);
             }}
           >
             <h2 className="text-black text-left">{article.title}</h2>
