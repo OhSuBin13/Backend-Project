@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const rateLimit = require("express-rate-limit");
+const weatherRoutes = require("./routes/weatherRoutes");
 
 dotenv.config();
 
@@ -13,6 +14,8 @@ const limiter = rateLimit({
 });
 
 app.use(limiter);
+
+app.use("/", weatherRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
