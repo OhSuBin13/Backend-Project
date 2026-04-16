@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class   ,.,                   AuthController {
+public class AuthController {
 
     private final AuthService authService;
 

@@ -12,5 +12,7 @@ public interface ToDoRepository extends JpaRepository<Todo, Long> {
 
     Page<Todo> findByUserId(Long userId, Pageable pageable);
 
+    Page<Todo> findByUserIdAndTitleContainingIgnoreCase(Long userId, String keyword, Pageable pageable);
+
     Optional<Todo> findByIdAndUserId(Long id, Long userId);
 }
