@@ -1,0 +1,20 @@
+{
+  "name": "markdown-note-taking-app",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@apiverve/spellchecker": "^1.1.14",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "marked": "^18.0.2",
+    "multer": "^2.1.1",
+    "spell-checker-js": "^1.2.6"
+  }
+}
