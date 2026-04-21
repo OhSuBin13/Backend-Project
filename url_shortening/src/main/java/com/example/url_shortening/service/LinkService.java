@@ -4,13 +4,15 @@ import com.example.url_shortening.dto.LinkDto;
 import com.example.url_shortening.dto.LinkExtraDto;
 
 public interface LinkService {
-    LinkDto save(LinkDto dto);
+    LinkDto create(LinkDto dto);
 
-    LinkDto updatedByShortCode(String shortCode, LinkDto dto);
+    LinkDto updateByShortCode(String shortCode, LinkDto dto);
 
-    LinkDto getDtoByShortCode(String shortCode);
+    LinkDto getByShortCode(String shortCode);
 
-    boolean deleteByShortCode(String shortCode);
+    LinkExtraDto getExtraByShortCode(String shortCode);
 
-    LinkExtraDto getExtraDtoByShortCode(String shortCode);
+    void incrementAccessCount(String shortCode);
+
+    void deleteByShortCode(String shortCode);
 }
