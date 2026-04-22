@@ -1,5 +1,6 @@
 package com.osb.shopapp.user;
 
+import com.osb.shopapp.role.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
