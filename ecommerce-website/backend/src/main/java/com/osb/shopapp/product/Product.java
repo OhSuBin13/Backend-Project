@@ -1,6 +1,7 @@
 package com.osb.shopapp.product;
 
 import com.osb.shopapp.category.Category;
+import com.osb.shopapp.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
