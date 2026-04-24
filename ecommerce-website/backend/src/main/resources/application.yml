@@ -2,5 +2,5 @@ spring:
   application:
     name: shopapp
 
-  profile:
+  profiles:
     active: dev
