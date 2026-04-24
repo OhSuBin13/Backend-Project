@@ -36,7 +36,7 @@ spring:
         connectiontimeout: 5000
         timeout: 3000
         writetimeout: 5000
-        
+
 application:
   security:
     jwt:
@@ -45,5 +45,9 @@ application:
         expiration: 1800000 # 30 minutes
       refresh-token:
         expiration: 604800000 # 1 week
+  frontend:
+    base-url: "http://localhost:5173"
 
+  mailing:
+    activation-url: "/auth/activation?code="
 
