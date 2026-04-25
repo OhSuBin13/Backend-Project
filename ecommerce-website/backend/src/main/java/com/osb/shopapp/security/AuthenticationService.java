@@ -1,6 +1,7 @@
 package com.osb.shopapp.security;
 
 import com.osb.shopapp.email.EmailService;
+import com.osb.shopapp.exception.APIException;
 import com.osb.shopapp.exception.ResourceAlreadyExistsException;
 import com.osb.shopapp.exception.ResourceNotFoundException;
 import com.osb.shopapp.role.Role;
@@ -11,17 +12,23 @@ import com.osb.shopapp.token.TokenRepository;
 import com.osb.shopapp.token.TokenType;
 import com.osb.shopapp.user.User;
 import com.osb.shopapp.user.UserRepository;
+import io.jsonwebtoken.JwtException;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,6 +48,7 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final MfaService mfaService;
 
     @Value("${spring.profiles.active}")
     private String activeProfile;
@@ -77,7 +85,8 @@ public class AuthenticationService {
         // Generate secret and QR code image if MFA is enabled
         String qrImageUri = null;
         if (registrationRequest.getIsMfaEnabled()) {
-            return null;
+            user.setSecret(mfaService.generateSecret());
+            qrImageUri = mfaService.generateQrCodeImageUri(user.getSecret(), user.getEmail());
         }
 
         userRepository.save(user);
@@ -143,10 +152,81 @@ public class AuthenticationService {
                     .build();
         }
 
-        return generateToken(user);
+        return generateTokens(user);
     }
 
-    private AuthenticationResponse generateToken(User user) {
+    @Transactional(
+            rollbackFor = MessagingException.class,
+            noRollbackFor = APIException.class
+    )
+    public void activateAccount(String code) throws MessagingException {
+        Token savedToken = tokenRepository.findByToken(code)
+                .orElseThrow(() -> new ResourceNotFoundException("Activation token not found"));
+
+        // Return if token has already been validated
+        if (savedToken.getValidatedAt() != null)
+            return;
+
+        if (LocalDateTime.now().isAfter(savedToken.getExpiresAt())) {
+            sendActivationEmail(savedToken.getUser());
+            throw new APIException("Activation code has expired. A new email has been sent");
+        }
+
+        User user = savedToken.getUser();
+        user.setIsEnabled(true);
+        userRepository.save(user);
+
+        savedToken.setValidatedAt(LocalDateTime.now());
+        tokenRepository.save(savedToken);
+    }
+
+    public void refreshToken(String refreshToken, HttpServletResponse response) throws IOException {
+        if (refreshToken.isEmpty())
+            throw new JwtException("No refresh token was provided");
+
+        String userEmail = jwtService.extractUsername(refreshToken);
+        if (userEmail != null) {
+            User user = userRepository.findWithAssociationsByEmail(userEmail)
+                    .orElseThrow(() -> new UsernameNotFoundException("User with the email '" + userEmail + "' does not exist"));
+
+            boolean isTokenRevoked = tokenRepository.findByToken(refreshToken)
+                    .map(Token::getIsRevoked)
+                    .orElseThrow(() -> new ResourceNotFoundException("Refresh token was not found"));
+
+            if (!isTokenRevoked && jwtService.isTokenValid(refreshToken, user)) {
+                Map<String, Object> claims = new HashMap<>();
+                claims.put("name", user.getRealName());
+                String newAccessToken = jwtService.generateAccessToken(claims, user);
+
+                AuthenticationResponse authenticationResponse =
+                        AuthenticationResponse.builder()
+                                .accessToken(newAccessToken)
+                                .build();
+
+                response.setContentType("application/json");
+                new ObjectMapper().writeValue(response.getOutputStream(), authenticationResponse);
+                return;
+            }
+        }
+        throw new JwtException("Invalid refresh token");
+    }
+
+    public AuthenticationResponse verifyOtp(VerificationRequest verificationRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        verificationRequest.getEmail(),
+                        verificationRequest.getPassword()
+                )
+        );
+        User user = (User) authentication.getPrincipal();
+
+        if (!mfaService.isOtpValid(user.getSecret(), verificationRequest.getOtp()))
+            throw new BadCredentialsException("OTP is not valid");
+
+        return generateTokens(user);
+    }
+
+    private AuthenticationResponse generateTokens(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("name", user.getRealName());
         String accessToken = jwtService.generateAccessToken(claims, user);
