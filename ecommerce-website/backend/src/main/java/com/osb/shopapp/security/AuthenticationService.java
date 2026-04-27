@@ -53,13 +53,13 @@ public class AuthenticationService {
     @Value("${spring.profiles.active}")
     private String activeProfile;
 
-    @Value("${application.frontend.base-url")
+    @Value("${application.frontend.base-url}")
     private String frontendBaseUrl;
 
-    @Value("{application.mailing.activation-url}")
+    @Value("${application.mailing.activation-url}")
     private String activationUrl;
 
-    @Value("{application.security.jwt.refresh-token.expiration}")
+    @Value("${application.security.jwt.refresh-token.expiration}")
     private long refreshExpirationTime;
 
     @Transactional

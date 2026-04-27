@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +35,8 @@ public class Product {
     private ProductCondition condition;
 
     private Integer availableQuantity;
+
+    private ZonedDateTime listedAt;
 
     @Column(nullable = false)
     private Boolean isDeleted;
