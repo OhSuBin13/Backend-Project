@@ -33,6 +33,7 @@ public class LogoutService implements LogoutHandler {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
                 response.getWriter().write("{\"error\": \"No access token in Bearer header\"}");
+                return;
             }
 
             final String accessToken = authHeader.substring(7);
