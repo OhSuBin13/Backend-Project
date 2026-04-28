@@ -51,3 +51,10 @@ application:
   mailing:
     activation-url: "/auth/activation?code="
 
+  file:
+    upload:
+      product-image-path: ./uploads/product-images
+      user-image-path: ./uploads/user-images
+      order-item-image-path: ./uploads/order-item-images
+      
+
