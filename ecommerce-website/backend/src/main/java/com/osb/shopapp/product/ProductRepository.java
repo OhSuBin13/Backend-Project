@@ -49,6 +49,12 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     Page<Product> findAllBySellerIdNotAndKeyword(Pageable pageable, String keyword, Integer sellerId);
 
     @Query("""
+            SELECT p FROM Product p WHERE p.isDeleted <> true AND p.seller.id = :sellerId
+            AND (p.name LIKE %:keyword% OR p.description LIKE %:keyword%)
+            """)
+    Page<Product> findALlBySellerIdAndKeyword(Pageable pageable, Integer sellerId, String keyword);
+
+    @Query("""
             SELECT p FROM Product p WHERE p.isDeleted <> true AND p.availableQuantity > 0
             AND p.seller.id <> :sellerId AND (p.name LIKE %:keyword% OR p.description LIKE %:keyword%)
             AND (p.category.id = :categoryId OR p.category.parentCategory.id = :categoryId)
