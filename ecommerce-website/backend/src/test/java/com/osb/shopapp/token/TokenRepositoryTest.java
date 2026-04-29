@@ -29,7 +29,7 @@ class TokenRepositoryTest {
 
     @Container
     @ServiceConnection
-    private static MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:8.0.33");
+    private static MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:9.2.0");
 
     private final TokenRepository tokenRepository;
     private final UserRepository userRepository;

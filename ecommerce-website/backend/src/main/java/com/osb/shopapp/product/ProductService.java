@@ -4,6 +4,7 @@ import com.osb.shopapp.category.Category;
 import com.osb.shopapp.category.CategoryRepository;
 import com.osb.shopapp.common.PageResponse;
 import com.osb.shopapp.exception.APIException;
+import com.osb.shopapp.exception.OperationNotPermittedException;
 import com.osb.shopapp.exception.ResourceNotFoundException;
 import com.osb.shopapp.file.FileService;
 import com.osb.shopapp.user.User;
@@ -17,9 +18,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Objects;
+
+import static com.osb.shopapp.common.AppConstant.*;
 
 @Service
 @RequiredArgsConstructor
@@ -321,5 +327,117 @@ public class ProductService {
                 products.isFirst(),
                 products.isLast()
         );
+    }
+
+    public ProductResponse update(ProductUpdateRequest productRequest, Integer productId, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+
+        Product existingProduct = productRepository.findWithAssociationsById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
+
+        if (!Objects.equals(existingProduct.getSeller().getId(), currentUser.getId()))
+            throw new OperationNotPermittedException("You do not have permission to update this product");
+
+        if (productRequest.getCategoryId() != null) {
+            Category category = categoryRepository.findWithAssociationById(productRequest.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("No category found with ID: " + productRequest.getCategoryId()));
+            existingProduct.setCategory(category);
+        }
+
+        if (productRequest.getName() != null) {
+            existingProduct.setName(productRequest.getName());
+        }
+
+        if (productRequest.getDescription() != null) {
+            existingProduct.setDescription(productRequest.getDescription());
+        }
+
+        if (productRequest.getPrice() != null) {
+            existingProduct.setPrice(productRequest.getPrice());
+        }
+
+        if (productRequest.getProductCondition() != null) {
+            existingProduct.setCondition(productRequest.getProductCondition());
+        }
+
+        if (productRequest.getAvailableQuantity() != null) {
+            existingProduct.setAvailableQuantity(productRequest.getAvailableQuantity());
+        }
+
+        if (productRequest.getIsDeleted() != null) {
+            existingProduct.setIsDeleted(productRequest.getIsDeleted());
+        }
+
+        Product updatedProduct = productRepository.save(existingProduct);
+        return productMapper.toProductResponse(updatedProduct);
+    }
+
+    public ProductResponse uploadProductImage(
+            List<MultipartFile> images, Integer productId, Authentication authentication
+    ) throws IOException {
+        User currentUser = (User) authentication.getPrincipal();
+        Product existingProduct = productRepository.findWithAssociationsById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
+
+        if (!Objects.equals(existingProduct.getSeller().getId(), currentUser.getId()))
+            throw new OperationNotPermittedException("You do not have permission to upload images for this product");
+
+        if (images.size() > MAX_IMAGE_NUMBER)
+            throw new APIException("You do not have permission to upload images for this product");
+
+        for (MultipartFile image : images) {
+            String fileName = image.getOriginalFilename();
+            String fileExtension = fileService.getFileExtension(fileName);
+            if (!ACCEPTED_IMAGE_EXTENSIONS.contains(fileExtension))
+                throw new APIException("Only images can be uploaded");
+        }
+
+        // Delete any previous images if product wasn't created using flyway script
+        if (productId > FLYWAY_PRODUCTS_NUMBER)
+            for (ProductImage productImage : existingProduct.getImages())
+                fileService.deleteFile(productImage.getImagePath());
+        existingProduct.getImages().clear();
+
+        // Save images
+        List<String> filePaths = fileService.saveProductImages(images, existingProduct.getId());
+        for (int i = 0; i < images.size(); i++) {
+            ProductImage productImage = ProductImage.builder()
+                    .name(images.get(i).getOriginalFilename())
+                    .type(images.get(i).getContentType())
+                    .imagePath(filePaths.get(i))
+                    .build();
+            existingProduct.getImages().add(productImage);
+        }
+
+        Product updatedProduct = productRepository.save(existingProduct);
+        return productMapper.toProductResponse(updatedProduct);
+    }
+
+    public ProductImageResponse findPrimaryProductImage(Integer productId) {
+        Product product = productRepository.findWithAssociationsById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
+
+        if (product.getImages().isEmpty())
+            throw new ResourceNotFoundException("No images found for product with ID: " + productId);
+
+        ProductImage primaryImage = product.getImages().get(0);
+        return productMapper.toProductImageResponse(primaryImage);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public void updateAvailability(Integer productId, Boolean isDeleted) {
+        Product product = productRepository.findWithAssociationsById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
+
+        product.setIsDeleted(isDeleted);
+        productRepository.save(product);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public ProductStatsResponse calculateStatistics() {
+        ZonedDateTime to = ZonedDateTime.now();
+        ZonedDateTime from = to.minusMonths(1);
+
+        return productRepository.calculateStatistics(from, to);
     }
 }

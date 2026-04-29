@@ -1,5 +1,7 @@
 package com.osb.shopapp.common;
 
+import java.util.Set;
+
 public final class AppConstant {
 
     private AppConstant() {
@@ -24,6 +26,18 @@ public final class AppConstant {
     public static final String SORT_USERS_BY = "id";
     public static final String SORT_ADDRESSES_BY = "id";
 
+    // Image upload constants
+    public static final Integer MAX_IMAGE_NUMBER = 5;
+    public static final Set<String> ACCEPTED_IMAGE_EXTENSIONS = Set.of("jpg", "jpeg", "png", "webp");
+
     // Thymeleaf template names
     public static final String USER_ACTIVATION_TEMPLATE = "account_activation";
+
+    // Number of entities manually created using flyway
+    // used to prevent deletion of related images
+    public static final Integer FLYWAY_PRODUCTS_NUMBER = 27;
+    public static final Integer FLYWAY_USERS_NUMBER = 4;
+    public static final Integer FLYWAY_ORDERS_NUMBER = 4;
+    public static final Integer FLYWAY_CATEGORIES_NUMBER = 4;
+
 }
