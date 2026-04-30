@@ -276,7 +276,7 @@ public class ProductService {
         }
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
-        Page<Product> products = productRepository.findALlBySellerIdAndKeyword(pageable, sellerId, keyword);
+        Page<Product> products = productRepository.findAllBySellerIdAndKeyword(pageable, sellerId, keyword);
         // Initialize lazy associations
         for (Product product : products) {
             product.getImages().size();
@@ -372,7 +372,7 @@ public class ProductService {
         return productMapper.toProductResponse(updatedProduct);
     }
 
-    public ProductResponse uploadProductImage(
+    public ProductResponse uploadProductImages(
             List<MultipartFile> images, Integer productId, Authentication authentication
     ) throws IOException {
         User currentUser = (User) authentication.getPrincipal();
@@ -383,7 +383,7 @@ public class ProductService {
             throw new OperationNotPermittedException("You do not have permission to upload images for this product");
 
         if (images.size() > MAX_IMAGE_NUMBER)
-            throw new APIException("You do not have permission to upload images for this product");
+            throw new APIException("Maximum 5 images can be uploaded");
 
         for (MultipartFile image : images) {
             String fileName = image.getOriginalFilename();
@@ -426,7 +426,7 @@ public class ProductService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public void updateAvailability(Integer productId, Boolean isDeleted) {
-        Product product = productRepository.findWithAssociationsById(productId)
+        Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("No product found with ID: " + productId));
 
         product.setIsDeleted(isDeleted);

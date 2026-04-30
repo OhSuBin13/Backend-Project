@@ -3,14 +3,20 @@ package com.osb.shopapp;
 import com.osb.shopapp.address.Address;
 import com.osb.shopapp.address.AddressType;
 import com.osb.shopapp.category.Category;
+import com.osb.shopapp.category.CategoryRequest;
+import com.osb.shopapp.category.CategoryResponse;
 import com.osb.shopapp.order.Order;
 import com.osb.shopapp.order.OrderItem;
 import com.osb.shopapp.order.OrderItemStatus;
 import com.osb.shopapp.order.OrderStatus;
 import com.osb.shopapp.product.Product;
 import com.osb.shopapp.product.ProductCondition;
+import com.osb.shopapp.product.ProductRequest;
+import com.osb.shopapp.product.ProductResponse;
 import com.osb.shopapp.role.Role;
 import com.osb.shopapp.user.User;
+import com.osb.shopapp.user.UserRequest;
+import com.osb.shopapp.user.UserResponse;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -41,9 +47,25 @@ public class TestDataUtils {
                 .build();
     }
 
-    // public static UserRequest createUserRequestA
+    public static UserRequest createUserRequestA() {
+        return UserRequest.builder()
+                .name("Test User A")
+                .homeCountry("UK")
+                .isMfaEnabled(false)
+                .build();
+    }
 
-    // public static UserResponse createUserResponseA
+    public static UserResponse createUserResponseA(Set<Role> roles) {
+        return UserResponse.builder()
+                .id(1)
+                .name("Test user A")
+                .email("test@test.com")
+                .homeCountry("UK")
+                .registeredAt(LocalDate.now())
+                .isMfaEnabled(false)
+                .roles(roles)
+                .build();
+    }
 
     public static User createUserB(Set<Role> roles) {
         return User.builder()
@@ -59,9 +81,17 @@ public class TestDataUtils {
                 .build();
     }
 
-    // public static UserRequest createUserRequestB
-
-    // public static UserResponse createUserResponseB
+    public static UserResponse createUserResponseB(Set<Role> roles) {
+        return UserResponse.builder()
+                .id(2)
+                .name("Test user B")
+                .email("testB@test.com")
+                .homeCountry("Greece")
+                .registeredAt(LocalDate.now())
+                .isMfaEnabled(false)
+                .roles(roles)
+                .build();
+    }
 
     public static Category createCategoryA() {
         return Category.builder()
@@ -70,9 +100,19 @@ public class TestDataUtils {
                 .build();
     }
 
-    // public static CategoryRequest createCategoryRequestA
+    public static CategoryRequest createCategoryRequestA() {
+        return CategoryRequest.builder()
+                .id(1)
+                .name("Test category A")
+                .build();
+    }
 
-    // public static CategoryResponse createCategoryResponseA
+    public static CategoryResponse createCategoryResponseA() {
+        return CategoryResponse.builder()
+                .id(1)
+                .name("Test Category A")
+                .build();
+    }
 
     public static Category createCategoryB() {
         return Category.builder()
@@ -81,9 +121,19 @@ public class TestDataUtils {
                 .build();
     }
 
-    // public static CategoryRequest createCategoryRequestB
+    public static CategoryRequest createCategoryRequestB() {
+        return CategoryRequest.builder()
+                .id(2)
+                .name("Test category B")
+                .build();
+    }
 
-    // public static CategoryResponse createCategoryResponseB
+    public static CategoryResponse createCategoryResponseB() {
+        return CategoryResponse.builder()
+                .id(2)
+                .name("Test Category B")
+                .build();
+    }
 
     public static Product createProductA(Category category, User seller) {
         return Product.builder()
@@ -102,9 +152,34 @@ public class TestDataUtils {
                 .build();
     }
 
-    //  public static ProductRequest createProductRequestA(Integer categoryId)
+    public static ProductRequest createProductRequestA(Integer categoryId) {
+        return ProductRequest.builder()
+                .id(1)
+                .name("Test product A")
+                .description("Description A")
+                .price(BigDecimal.valueOf(10.00))
+                .condition(ProductCondition.NEW)
+                .availableQuantity(2)
+                .categoryId(categoryId)
+                .build();
+    }
 
-    // public static ProductResponse createProductResponseA
+    public static ProductResponse createProductResponseA(CategoryResponse categoryResponse, UserResponse userResponse) {
+        return ProductResponse.builder()
+                .id(1)
+                .name("Test product A")
+                .description("Description A")
+                .price(BigDecimal.valueOf(10.00))
+                .previousPrice(BigDecimal.valueOf(5.0))
+                .condition(ProductCondition.NEW)
+                .availableQuantity(2)
+                .listedAt(CURRENT_TIME)
+                .isDeleted(false)
+                .category(categoryResponse)
+                .seller(userResponse)
+                .images(new ArrayList<>())
+                .build();
+    }
 
     public static Product createProductB(Category category, User seller) {
         return Product.builder()
@@ -123,9 +198,22 @@ public class TestDataUtils {
                 .build();
     }
 
-    //  public static ProductRequest createProductRequestB(Integer categoryId)
-
-    // public static ProductResponse createProductResponseB
+    public static ProductResponse createProductResponseB(CategoryResponse categoryResponse, UserResponse userResponse) {
+        return ProductResponse.builder()
+                .id(1)
+                .name("Test product B")
+                .description("Description B")
+                .price(BigDecimal.valueOf(20.00))
+                .previousPrice(BigDecimal.valueOf(10.0))
+                .condition(ProductCondition.LINK_NEW)
+                .availableQuantity(3)
+                .listedAt(CURRENT_TIME)
+                .isDeleted(false)
+                .category(categoryResponse)
+                .seller(userResponse)
+                .images(new ArrayList<>())
+                .build();
+    }
 
     public static Address createAddressA(User user) {
         return Address.builder()

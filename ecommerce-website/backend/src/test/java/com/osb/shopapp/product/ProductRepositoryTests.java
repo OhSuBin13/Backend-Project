@@ -155,7 +155,7 @@ public class ProductRepositoryTests {
                 Sort.by(AppConstant.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstant.SORT_PRODUCTS_BY).descending();
         Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
 
-        Page<Product> page = productRepository.findALlBySellerIdAndKeyword(pageable, productA.getSeller().getId(), "Test product");
+        Page<Product> page = productRepository.findAllBySellerIdAndKeyword(pageable, productA.getSeller().getId(), "Test product");
 
         assertThat(page.getContent().size()).isEqualTo(1);
         assertThat(page.getContent().get(0).getId()).isEqualTo(productA.getId());

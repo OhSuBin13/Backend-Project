@@ -52,7 +52,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
             SELECT p FROM Product p WHERE p.isDeleted <> true AND p.seller.id = :sellerId
             AND (p.name LIKE %:keyword% OR p.description LIKE %:keyword%)
             """)
-    Page<Product> findALlBySellerIdAndKeyword(Pageable pageable, Integer sellerId, String keyword);
+    Page<Product> findAllBySellerIdAndKeyword(Pageable pageable, Integer sellerId, String keyword);
 
     @Query("""
             SELECT p FROM Product p WHERE p.isDeleted <> true AND p.availableQuantity > 0
