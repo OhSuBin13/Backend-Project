@@ -24,7 +24,7 @@ public class ProductRequest {
     @Size(max = MAX_PRODUCT_DESCRIPTION_LENGTH, message = "Description must not exceed 5000 characters")
     private String description;
 
-    @NotBlank(message = "Price must not be empty")
+    @NotNull(message = "Price must not be empty")
     @PositiveOrZero(message = "Price must be a non-negative value")
     @Max(value = MAX_PRODUCT_PRICE, message = "Price must not exceed 10000")
     @Digits(integer = 5, fraction = 2, message = "Price must be a decimal number with up to 2 decimal places")

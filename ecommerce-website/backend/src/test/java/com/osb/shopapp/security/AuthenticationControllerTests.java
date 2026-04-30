@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(TestConfig.class)
 public class AuthenticationControllerTests {
 
-    private static final Integer REFRESH_TOKEN_EXpIRATION_TIME = 120000; // 2 minutes
+    private static final Integer REFRESH_TOKEN_EXPIRATION_TIME = 120000; // 2 minutes
 
     @Autowired
     private MockMvc mockMvc;
@@ -102,7 +102,7 @@ public class AuthenticationControllerTests {
                 .httpOnly(true)
                 .secure(false)
                 .path("/")
-                .maxAge(REFRESH_TOKEN_EXpIRATION_TIME / 1000)
+                .maxAge(REFRESH_TOKEN_EXPIRATION_TIME / 1000)
                 .build();
         AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
                 .accessToken("accessToken")
