@@ -1,6 +1,8 @@
 package com.osb.shopapp;
 
 import com.osb.shopapp.address.Address;
+import com.osb.shopapp.address.AddressRequest;
+import com.osb.shopapp.address.AddressResponse;
 import com.osb.shopapp.address.AddressType;
 import com.osb.shopapp.category.Category;
 import com.osb.shopapp.category.CategoryRequest;
@@ -231,6 +233,36 @@ public class TestDataUtils {
                 .build();
     }
 
+    public static AddressRequest createAddressRequestA() {
+        return AddressRequest.builder()
+                .name("Test address A")
+                .country("UK")
+                .street("Mappin street")
+                .state("South Yorkshire")
+                .city("Sheffield")
+                .postalCode("S1 4DT")
+                .phoneNumber("+441234567890")
+                .isMain(false)
+                .addressType("HOME")
+                .build();
+    }
+
+    public static AddressResponse createAddressResponseA(Integer userId) {
+        return AddressResponse.builder()
+                .id(1)
+                .name("Test address A")
+                .country("UK")
+                .street("Mappin street")
+                .state("South Yorkshire")
+                .city("Sheffield")
+                .postalCode("S1 4DT")
+                .phoneNumber("+441234567890")
+                .isMain(false)
+                .addressType(AddressType.HOME)
+                .userId(userId)
+                .build();
+    }
+
     public static Address createAddressB(User user) {
         return Address.builder()
                 .id(2)
@@ -244,6 +276,22 @@ public class TestDataUtils {
                 .isMain(false)
                 .addressType(AddressType.WORK)
                 .user(user)
+                .build();
+    }
+
+    public static AddressResponse createAddressResponseB(Integer userId) {
+        return AddressResponse.builder()
+                .id(2)
+                .name("Test address B")
+                .country("Greece")
+                .street("Ermou Street")
+                .state("Attica")
+                .city("Athens")
+                .postalCode("10563")
+                .phoneNumber("+302112345678")
+                .isMain(false)
+                .addressType(AddressType.WORK)
+                .userId(userId)
                 .build();
     }
 
