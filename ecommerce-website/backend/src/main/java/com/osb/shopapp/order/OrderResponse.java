@@ -1,7 +1,6 @@
 package com.osb.shopapp.order;
 
-import com.osb.shopapp.user.User;
-import jakarta.persistence.*;
+import com.osb.shopapp.user.UserResponse;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -9,48 +8,37 @@ import java.math.RoundingMode;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-@Entity
-@Table(name = "CustomerOrder")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Order {
+public class OrderResponse {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private ZonedDateTime placedAt;
 
     private String paymentMethod;
 
-    @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
-    // ID of the associated Stripe Checkout session
     private String stripeCheckoutId;
 
     private String billingAddress;
 
     private String deliveryAddress;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
-    private User buyer;
+    private BigDecimal total;
 
-    @OneToMany(
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
-    @JoinColumn(name = "orderId", nullable = false)
-    private List<OrderItem> orderItems;
+    private UserResponse buyer;
+
+    private List<OrderItemResponse> orderItems;
 
     public BigDecimal calculateTotalPrice() {
         BigDecimal totalPrice = BigDecimal.ZERO;
 
-        for (OrderItem orderItem : orderItems) {
+        for (OrderItemResponse orderItem : orderItems) {
             BigDecimal productPrice = orderItem.getProductPrice();
             Integer productQuantity = orderItem.getProductQuantity();
             totalPrice = totalPrice.add(productPrice.multiply(BigDecimal.valueOf(productQuantity)));
@@ -58,5 +46,4 @@ public class Order {
 
         return totalPrice.setScale(2, RoundingMode.HALF_UP);
     }
-
 }
