@@ -8,7 +8,7 @@ import com.osb.shopapp.cart.CartItem;
 import com.osb.shopapp.cart.CartItemRepository;
 import com.osb.shopapp.category.Category;
 import com.osb.shopapp.category.CategoryResponse;
-import com.osb.shopapp.common.AppConstant;
+import com.osb.shopapp.common.AppConstants;
 import com.osb.shopapp.common.PageResponse;
 import com.osb.shopapp.email.EmailService;
 import com.osb.shopapp.exception.APIException;
@@ -370,9 +370,9 @@ public class OrderServiceTests {
 
     @Test
     public void shouldFindAllOrders() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_ORDERS_BY).ascending() : Sort.by(AppConstant.SORT_ORDERS_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_ORDERS_BY).ascending() : Sort.by(AppConstants.SORT_ORDERS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
         Page<Order> page = new PageImpl<>(List.of(orderA, orderB));
 
         when(orderRepository.findAll(pageable)).thenReturn(page);
@@ -380,8 +380,8 @@ public class OrderServiceTests {
         when(orderMapper.toOrderResponse(orderB)).thenReturn(orderResponseB);
 
         PageResponse<OrderResponse> pageResponse =
-                orderService.findAll(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
-                        AppConstant.SORT_ORDERS_BY, AppConstant.SORT_DIR);
+                orderService.findAll(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_ORDERS_BY, AppConstants.SORT_DIR);
 
         assertThat(pageResponse.getContent()).isNotNull();
         assertThat(pageResponse.getTotalElement()).isEqualTo(2);
@@ -391,17 +391,17 @@ public class OrderServiceTests {
 
     @Test
     public void shouldFindAllOrdersByBuyerIdWhenValidRequest() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_ORDERS_BY).ascending() : Sort.by(AppConstant.SORT_ORDERS_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_ORDERS_BY).ascending() : Sort.by(AppConstants.SORT_ORDERS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
         Page<Order> page = new PageImpl<>(List.of(orderA));
 
         when(orderRepository.findAllPaidByBuyerId(pageable, userA.getId())).thenReturn(page);
         when(orderMapper.toOrderResponse(orderA)).thenReturn(orderResponseA);
 
         PageResponse<OrderResponse> pageResponse =
-                orderService.findAllByBuyerId(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
-                        AppConstant.SORT_ORDERS_BY, AppConstant.SORT_DIR, userA.getId(), authentication);
+                orderService.findAllByBuyerId(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_ORDERS_BY, AppConstants.SORT_DIR, userA.getId(), authentication);
 
         assertThat(pageResponse.getContent()).isNotNull();
         assertThat(pageResponse.getTotalElement()).isEqualTo(1);
@@ -411,25 +411,25 @@ public class OrderServiceTests {
     @Test
     public void shouldNotFindAllOrdersByBuyerIdWhenBuyerIsNotLoggedIn() {
         assertThatThrownBy(
-                () -> orderService.findAllByBuyerId(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
-                        AppConstant.SORT_ORDERS_BY, AppConstant.SORT_DIR, orderB.getBuyer().getId(), authentication)
+                () -> orderService.findAllByBuyerId(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_ORDERS_BY, AppConstants.SORT_DIR, orderB.getBuyer().getId(), authentication)
         ).isInstanceOf(OperationNotPermittedException.class)
                 .hasMessage("You do not have permission to view the orders of this user");
     }
 
     @Test
     public void shouldFindAllOrdersByProductSellerIdWhenValidRequest() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_ORDERS_BY).ascending() : Sort.by(AppConstant.SORT_ORDERS_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_ORDERS_BY).ascending() : Sort.by(AppConstants.SORT_ORDERS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
         Page<Order> page = new PageImpl<>(List.of(orderB));
 
         when(orderRepository.findAllPaidByProductSellerId(pageable, userA.getId())).thenReturn(page);
         when(orderMapper.toOrderResponse(orderB)).thenReturn(orderResponseB);
 
         PageResponse<OrderResponse> pageResponse =
-                orderService.findAllByProductSellerId(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
-                        AppConstant.SORT_ORDERS_BY, AppConstant.SORT_DIR, userA.getId(), authentication);
+                orderService.findAllByProductSellerId(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_ORDERS_BY, AppConstants.SORT_DIR, userA.getId(), authentication);
 
         assertThat(pageResponse.getContent()).isNotNull();
         assertThat(pageResponse.getTotalElement()).isEqualTo(1);
@@ -439,8 +439,8 @@ public class OrderServiceTests {
     @Test
     public void shouldNotFindAllOrdersByProductSellerIdWhenSellerIsNotLoggedIn() {
         assertThatThrownBy(
-                () -> orderService.findAllByProductSellerId(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
-                        AppConstant.SORT_ORDERS_BY, AppConstant.SORT_DIR, orderA.getOrderItems().get(0).getProductSeller().getId(), authentication)
+                () -> orderService.findAllByProductSellerId(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_ORDERS_BY, AppConstants.SORT_DIR, orderA.getOrderItems().get(0).getProductSeller().getId(), authentication)
         ).isInstanceOf(OperationNotPermittedException.class)
                 .hasMessage("You do not have permission to view the orders of this user");
     }

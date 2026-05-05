@@ -5,7 +5,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
-import static com.osb.shopapp.common.AppConstant.*;
+import static com.osb.shopapp.common.AppConstants.*;
 
 @Getter
 @Setter

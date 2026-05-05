@@ -1,7 +1,7 @@
 package com.osb.shopapp.category;
 
 import com.osb.shopapp.TestDataUtils;
-import com.osb.shopapp.common.AppConstant;
+import com.osb.shopapp.common.AppConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,8 +62,8 @@ public class CategoryRepositoryTests {
 
     @Test
     public void shouldFindAllCategoriesByKeyword() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_CATEGORIES_BY).ascending() : Sort.by(AppConstant.SORT_CATEGORIES_BY).descending();
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_CATEGORIES_BY).ascending() : Sort.by(AppConstants.SORT_CATEGORIES_BY).descending();
 
         List<Category> categories = categoryRepository.findAllByKeyword(sort, "test category");
 

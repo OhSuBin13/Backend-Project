@@ -1,7 +1,7 @@
 package com.osb.shopapp.category;
 
 import com.osb.shopapp.TestDataUtils;
-import com.osb.shopapp.common.AppConstant;
+import com.osb.shopapp.common.AppConstants;
 import com.osb.shopapp.exception.APIException;
 import com.osb.shopapp.exception.ForeignKeyConstraintException;
 import com.osb.shopapp.exception.ResourceAlreadyExistsException;
@@ -114,15 +114,15 @@ public class CategoryServiceTests {
 
     @Test
     public void shouldFindAllCategories() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_CATEGORIES_BY).ascending() : Sort.by(AppConstant.SORT_CATEGORIES_BY).descending();
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_CATEGORIES_BY).ascending() : Sort.by(AppConstants.SORT_CATEGORIES_BY).descending();
 
         when(categoryRepository.findAll(sort)).thenReturn(List.of(categoryA, categoryB));
         when(categoryMapper.toCategoryResponse(categoryA)).thenReturn(categoryResponseA);
         when(categoryMapper.toCategoryResponse(categoryB)).thenReturn(categoryResponseB);
 
         List<CategoryResponse> categoryResponses =
-                categoryService.findAll(AppConstant.SORT_CATEGORIES_BY, AppConstant.SORT_DIR);
+                categoryService.findAll(AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR);
 
         assertThat(categoryResponses.size()).isEqualTo(2);
         assertThat(categoryResponses.get(0)).isEqualTo(categoryResponseA);
@@ -131,15 +131,15 @@ public class CategoryServiceTests {
 
     @Test
     public void shouldFindAllCategoriesByKeyword() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_CATEGORIES_BY).ascending() : Sort.by(AppConstant.SORT_CATEGORIES_BY).descending();
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_CATEGORIES_BY).ascending() : Sort.by(AppConstants.SORT_CATEGORIES_BY).descending();
 
         when(categoryRepository.findAllByKeyword(sort, "test category")).thenReturn(List.of(categoryA, categoryB));
         when(categoryMapper.toCategoryResponse(categoryA)).thenReturn(categoryResponseA);
         when(categoryMapper.toCategoryResponse(categoryB)).thenReturn(categoryResponseB);
 
         List<CategoryResponse> categoryResponses =
-                categoryService.findAllByKeyword(AppConstant.SORT_CATEGORIES_BY, AppConstant.SORT_DIR, "test category");
+                categoryService.findAllByKeyword(AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR, "test category");
 
         assertThat(categoryResponses.size()).isEqualTo(2);
         assertThat(categoryResponses.get(0)).isEqualTo(categoryResponseA);

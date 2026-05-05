@@ -1,6 +1,6 @@
 package com.osb.shopapp.product;
 
-import com.osb.shopapp.common.AppConstant;
+import com.osb.shopapp.common.AppConstants;
 import com.osb.shopapp.common.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,10 +40,10 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<PageResponse<ProductResponse>> findAll(
-            @RequestParam(name = "pageNumber", defaultValue = AppConstant.PAGE_NUMBER, required = false) Integer pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = AppConstant.PAGE_SIZE, required = false) Integer pageSize,
-            @RequestParam(name = "sortBy", defaultValue = AppConstant.SORT_PRODUCTS_BY, required = false) String sortBy,
-            @RequestParam(name = "sortDirection", defaultValue = AppConstant.SORT_DIR, required = false) String sortDirection,
+            @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
+            @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_PRODUCTS_BY, required = false) String sortBy,
+            @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection,
             @RequestParam(name = "search", required = false) String search
     ) {
         PageResponse<ProductResponse> foundProducts = (search == null || search.isBlank()) ?
@@ -60,10 +60,10 @@ public class ProductController {
 
     @GetMapping("/others")
     public ResponseEntity<PageResponse<ProductResponse>> findAllExceptSellerProducts(
-            @RequestParam(name = "pageNumber", defaultValue = AppConstant.PAGE_NUMBER, required = false) Integer pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = AppConstant.PAGE_SIZE, required = false) Integer pageSize,
-            @RequestParam(name = "sortBy", defaultValue = AppConstant.SORT_PRODUCTS_BY, required = false) String sortBy,
-            @RequestParam(name = "sortDirection", defaultValue = AppConstant.SORT_DIR, required = false) String sortDirection,
+            @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
+            @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_PRODUCTS_BY, required = false) String sortBy,
+            @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection,
             @RequestParam(name = "search", required = false) String search,
             Authentication authentication
     ) {
@@ -76,10 +76,10 @@ public class ProductController {
 
     @GetMapping("/users/{seller-id}")
     public ResponseEntity<PageResponse<ProductResponse>> findAllBySellerId(
-            @RequestParam(name = "pageNumber", defaultValue = AppConstant.PAGE_NUMBER, required = false) Integer pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = AppConstant.PAGE_SIZE, required = false) Integer pageSize,
-            @RequestParam(name = "sortBy", defaultValue = AppConstant.SORT_PRODUCTS_BY, required = false) String sortBy,
-            @RequestParam(name = "sortDirection", defaultValue = AppConstant.SORT_DIR, required = false) String sortDirection,
+            @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
+            @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_PRODUCTS_BY, required = false) String sortBy,
+            @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection,
             @PathVariable(name = "seller-id") Integer sellerId,
             @RequestParam(name = "search", required = false) String search
     ) {
@@ -91,10 +91,10 @@ public class ProductController {
 
     @GetMapping("/categories/{category-id}")
     public ResponseEntity<PageResponse<ProductResponse>> findAllByCategoryId(
-            @RequestParam(name = "pageNumber", defaultValue = AppConstant.PAGE_NUMBER, required = false) Integer pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = AppConstant.PAGE_SIZE, required = false) Integer pageSize,
-            @RequestParam(name = "sortBy", defaultValue = AppConstant.SORT_PRODUCTS_BY, required = false) String sortBy,
-            @RequestParam(name = "sortDirection", defaultValue = AppConstant.SORT_DIR, required = false) String sortDirection,
+            @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
+            @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_PRODUCTS_BY, required = false) String sortBy,
+            @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection,
             @PathVariable(name = "category-id") Integer categoryId,
             @RequestParam(name = "search", required = false) String search,
             Authentication authentication

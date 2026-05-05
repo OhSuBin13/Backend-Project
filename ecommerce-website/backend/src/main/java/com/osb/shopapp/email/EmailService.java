@@ -1,6 +1,6 @@
 package com.osb.shopapp.email;
 
-import com.osb.shopapp.common.AppConstant;
+import com.osb.shopapp.common.AppConstants;
 import com.osb.shopapp.order.Order;
 import com.osb.shopapp.order.OrderItem;
 import com.osb.shopapp.product.Product;
@@ -45,7 +45,7 @@ public class EmailService {
         variables.put("activationCode", activationCode);
         Context context = new Context();
         context.setVariables(variables);
-        String template = templateEngine.process(AppConstant.USER_ACTIVATION_TEMPLATE, context);
+        String template = templateEngine.process(AppConstants.USER_ACTIVATION_TEMPLATE, context);
 
         mimeMessageHelper.setFrom("resellmartmail@gmail.com");
         mimeMessageHelper.setTo(to);
@@ -70,7 +70,7 @@ public class EmailService {
         variables.put("order", order);
         Context context = new Context();
         context.setVariables(variables);
-        String template = templateEngine.process(AppConstant.USER_ACTIVATION_TEMPLATE, context);
+        String template = templateEngine.process(AppConstants.USER_ACTIVATION_TEMPLATE, context);
 
         mimeMessageHelper.setFrom("resellmartmail@gmail.com");
         mimeMessageHelper.setTo(to);
@@ -99,7 +99,7 @@ public class EmailService {
         variables.put("requestedQuantity", requestedQuality);
         Context context = new Context();
         context.setVariables(variables);
-        String template = templateEngine.process(AppConstant.USER_ACTIVATION_TEMPLATE, context);
+        String template = templateEngine.process(AppConstants.USER_ACTIVATION_TEMPLATE, context);
 
         mimeMessageHelper.setFrom("resellmartmail@gmail.com");
         mimeMessageHelper.setTo(to);
@@ -130,7 +130,7 @@ public class EmailService {
         variables.put("saleTotal", saleTotal);
         Context context = new Context();
         context.setVariables(variables);
-        String template = templateEngine.process(AppConstant.USER_ACTIVATION_TEMPLATE, context);
+        String template = templateEngine.process(AppConstants.USER_ACTIVATION_TEMPLATE, context);
 
         mimeMessageHelper.setFrom("resellmartmail@gmail.com");
         mimeMessageHelper.setTo(to);
@@ -155,7 +155,7 @@ public class EmailService {
         variables.put("order", order);
         Context context = new Context();
         context.setVariables(variables);
-        String template = templateEngine.process(AppConstant.USER_ACTIVATION_TEMPLATE, context);
+        String template = templateEngine.process(AppConstants.USER_ACTIVATION_TEMPLATE, context);
 
         mimeMessageHelper.setFrom("resellmartmail@gmail.com");
         mimeMessageHelper.setTo(to);

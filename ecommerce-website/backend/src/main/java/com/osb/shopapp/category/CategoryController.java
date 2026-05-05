@@ -1,6 +1,6 @@
 package com.osb.shopapp.category;
 
-import com.osb.shopapp.common.AppConstant;
+import com.osb.shopapp.common.AppConstants;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -34,8 +34,8 @@ public class CategoryController {
 
     @GetMapping
     public ResponseEntity<List<CategoryResponse>> findAll(
-            @RequestParam(name = "sortBy", defaultValue = AppConstant.SORT_CATEGORIES_BY, required = false) String sortBy,
-            @RequestParam(name = "sortDirection", defaultValue = AppConstant.SORT_DIR, required = false) String sortDirection,
+            @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_CATEGORIES_BY, required = false) String sortBy,
+            @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection,
             @RequestParam(name = "search", required = false) String search
     ) {
         List<CategoryResponse> foundCategories = (search == null || search.isBlank()) ?

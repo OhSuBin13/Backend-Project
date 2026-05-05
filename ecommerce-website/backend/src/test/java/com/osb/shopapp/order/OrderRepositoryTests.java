@@ -5,7 +5,7 @@ import com.osb.shopapp.address.Address;
 import com.osb.shopapp.address.AddressRepository;
 import com.osb.shopapp.category.Category;
 import com.osb.shopapp.category.CategoryRepository;
-import com.osb.shopapp.common.AppConstant;
+import com.osb.shopapp.common.AppConstants;
 import com.osb.shopapp.product.Product;
 import com.osb.shopapp.product.ProductRepository;
 import com.osb.shopapp.role.Role;
@@ -120,9 +120,9 @@ public class OrderRepositoryTests {
 
     @Test
     public void shouldFindAllPaidOrdersByBuyerId() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_ORDERS_BY).ascending() : Sort.by(AppConstant.SORT_ORDERS_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_ORDERS_BY).ascending() : Sort.by(AppConstants.SORT_ORDERS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
 
         Page<Order> page = orderRepository.findAllPaidByBuyerId(pageable, orderA1.getBuyer().getId());
 
@@ -132,9 +132,9 @@ public class OrderRepositoryTests {
 
     @Test
     public void shouldFindAllPaidOrdersByProductSellerId() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_ORDERS_BY).ascending() : Sort.by(AppConstant.SORT_ORDERS_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_ORDERS_BY).ascending() : Sort.by(AppConstants.SORT_ORDERS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
 
         Page<Order> page = orderRepository.findAllPaidByProductSellerId(pageable, orderB1.getOrderItems().get(0).getProductSeller().getId());
 

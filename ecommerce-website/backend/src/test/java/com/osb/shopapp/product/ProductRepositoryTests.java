@@ -3,7 +3,7 @@ package com.osb.shopapp.product;
 import com.osb.shopapp.TestDataUtils;
 import com.osb.shopapp.category.Category;
 import com.osb.shopapp.category.CategoryRepository;
-import com.osb.shopapp.common.AppConstant;
+import com.osb.shopapp.common.AppConstants;
 import com.osb.shopapp.role.Role;
 import com.osb.shopapp.role.RoleRepository;
 import com.osb.shopapp.user.User;
@@ -83,9 +83,9 @@ public class ProductRepositoryTests {
 
     @Test
     public void shouldFindAllProductsByKeyword() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstant.SORT_PRODUCTS_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
 
         Page<Product> page = productRepository.findAllByKeyword(pageable, "Test product");
 
@@ -98,9 +98,9 @@ public class ProductRepositoryTests {
 
     @Test
     public void shouldFindAllProductsBySellerIdNot() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstant.SORT_PRODUCTS_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
 
         Page<Product> page = productRepository.findAllBySellerIdNot(pageable, productA.getSeller().getId());
 
@@ -111,9 +111,9 @@ public class ProductRepositoryTests {
 
     @Test
     public void shouldFindAllProductBySellerId() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstant.SORT_PRODUCTS_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
 
         Page<Product> page = productRepository.findAllBySellerId(pageable, productA.getSeller().getId());
 
@@ -124,9 +124,9 @@ public class ProductRepositoryTests {
 
     @Test
     public void shouldFindAllProductsByCategoryId() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstant.SORT_PRODUCTS_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
 
         Page<Product> page = productRepository.findAllByCategoryId(pageable, productA.getCategory().getId(), productA.getSeller().getId());
 
@@ -137,9 +137,9 @@ public class ProductRepositoryTests {
 
     @Test
     public void shouldFindAllProductsExceptSellerProductsByKeyword() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstant.SORT_PRODUCTS_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
 
         Page<Product> page =
                 productRepository.findAllBySellerIdNotAndKeyword(pageable, "Test product", productA.getSeller().getId());
@@ -151,9 +151,9 @@ public class ProductRepositoryTests {
 
     @Test
     public void shouldFindAllProductsBySellerIdAndKeyword() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstant.SORT_PRODUCTS_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
 
         Page<Product> page = productRepository.findAllBySellerIdAndKeyword(pageable, productA.getSeller().getId(), "Test product");
 
@@ -164,9 +164,9 @@ public class ProductRepositoryTests {
 
     @Test
     public void shouldFindAllProductsByCategoryIdAndKeyword() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstant.SORT_PRODUCTS_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
 
         Page<Product> page =
                 productRepository.findAllByCategoryIdAndKeyword(

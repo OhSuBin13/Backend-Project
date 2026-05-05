@@ -4,7 +4,7 @@ import com.osb.shopapp.TestDataUtils;
 import com.osb.shopapp.category.Category;
 import com.osb.shopapp.category.CategoryRepository;
 import com.osb.shopapp.category.CategoryResponse;
-import com.osb.shopapp.common.AppConstant;
+import com.osb.shopapp.common.AppConstants;
 import com.osb.shopapp.common.PageResponse;
 import com.osb.shopapp.exception.APIException;
 import com.osb.shopapp.exception.OperationNotPermittedException;
@@ -185,9 +185,9 @@ public class ProductServiceTests {
 
     @Test
     public void shouldFindAllProducts() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstant.SORT_PRODUCTS_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
         Page<Product> page = new PageImpl<>(List.of(productA, productB));
 
         when(productRepository.findAll(pageable)).thenReturn(page);
@@ -195,8 +195,8 @@ public class ProductServiceTests {
         when(productMapper.toProductResponse(productB)).thenReturn(productResponseB);
 
         PageResponse<ProductResponse> pageResponse =
-                productService.findAll(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
-                        AppConstant.SORT_PRODUCTS_BY, AppConstant.SORT_DIR);
+                productService.findAll(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR);
 
         assertThat(pageResponse.getContent().size()).isEqualTo(2);
         assertThat(pageResponse.getContent().get(0)).isEqualTo(productResponseA);
@@ -222,9 +222,9 @@ public class ProductServiceTests {
 
     @Test
     public void shouldFIndAllProductsByKeyword() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstant.SORT_PRODUCTS_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
         Page<Product> page = new PageImpl<>(List.of(productA, productB));
 
         when(productRepository.findAllByKeyword(pageable, "Test product")).thenReturn(page);
@@ -232,8 +232,8 @@ public class ProductServiceTests {
         when(productMapper.toProductResponse(productB)).thenReturn(productResponseB);
 
         PageResponse<ProductResponse> pageResponse =
-                productService.findAllByKeyword(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
-                        AppConstant.SORT_PRODUCTS_BY, AppConstant.SORT_DIR, "Test product");
+                productService.findAllByKeyword(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR, "Test product");
 
         assertThat(pageResponse.getContent().size()).isEqualTo(2);
         assertThat(pageResponse.getContent().get(0)).isEqualTo(productResponseA);
@@ -242,17 +242,17 @@ public class ProductServiceTests {
 
     @Test
     public void shouldFindAllProductsExceptSellerProducts() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstant.SORT_PRODUCTS_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
         Page<Product> page = new PageImpl<>(List.of(productB));
 
         when(productRepository.findAllBySellerIdNot(pageable, productA.getSeller().getId())).thenReturn(page);
         when(productMapper.toProductResponse(productB)).thenReturn(productResponseB);
 
         PageResponse<ProductResponse> pageResponse =
-                productService.findAllExceptSellerProducts(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
-                        AppConstant.SORT_PRODUCTS_BY, AppConstant.SORT_DIR, authentication);
+                productService.findAllExceptSellerProducts(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR, authentication);
 
         assertThat(pageResponse.getContent().size()).isEqualTo(1);
         assertThat(pageResponse.getContent().get(0)).isEqualTo(productResponseB);
@@ -260,17 +260,17 @@ public class ProductServiceTests {
 
     @Test
     public void shouldFindAllProductsBySellerId() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstant.SORT_PRODUCTS_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
         Page<Product> page = new PageImpl<>(List.of(productA));
 
         when(productRepository.findAllBySellerId(pageable, productA.getSeller().getId())).thenReturn(page);
         when(productMapper.toProductResponse(productA)).thenReturn(productResponseA);
 
         PageResponse<ProductResponse> pageResponse =
-                productService.findAllBySellerId(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
-                        AppConstant.SORT_PRODUCTS_BY, AppConstant.SORT_DIR, productA.getSeller().getId());
+                productService.findAllBySellerId(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR, productA.getSeller().getId());
 
         assertThat(pageResponse.getContent().size()).isEqualTo(1);
         assertThat(pageResponse.getContent().get(0)).isEqualTo(productResponseA);
@@ -278,17 +278,17 @@ public class ProductServiceTests {
 
     @Test
     public void shouldFindAllProductsByCategoryId() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstant.SORT_PRODUCTS_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
         Page<Product> page = new PageImpl<>(List.of(productB));
 
         when(productRepository.findAllByCategoryId(pageable, productA.getCategory().getId(), productA.getSeller().getId())).thenReturn(page);
         when(productMapper.toProductResponse(productB)).thenReturn(productResponseB);
 
         PageResponse<ProductResponse> pageResponse =
-                productService.findAllByCategoryId(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
-                        AppConstant.SORT_PRODUCTS_BY, AppConstant.SORT_DIR, productA.getCategory().getId(), authentication);
+                productService.findAllByCategoryId(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR, productA.getCategory().getId(), authentication);
 
         assertThat(pageResponse.getContent().size()).isEqualTo(1);
         assertThat(pageResponse.getContent().get(0)).isEqualTo(productResponseB);
@@ -296,16 +296,16 @@ public class ProductServiceTests {
 
     @Test
     public void shouldFindAllProductsExceptSellerProductByKeyword() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstant.SORT_PRODUCTS_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
         Page<Product> page = new PageImpl<>(List.of(productB));
 
         when(productRepository.findAllBySellerIdNotAndKeyword(pageable, "Test product", userA.getId())).thenReturn(page);
         when(productMapper.toProductResponse(productB)).thenReturn(productResponseB);
 
-        PageResponse<ProductResponse> pageResponse = productService.findAllByExceptSellerProductByKeyword(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
-                AppConstant.SORT_PRODUCTS_BY, AppConstant.SORT_DIR, "Test product", authentication);
+        PageResponse<ProductResponse> pageResponse = productService.findAllByExceptSellerProductByKeyword(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR, "Test product", authentication);
 
         assertThat(pageResponse.getContent().size()).isEqualTo(1);
         assertThat(pageResponse.getContent().get(0)).isEqualTo(productResponseB);
@@ -313,16 +313,16 @@ public class ProductServiceTests {
 
     @Test
     public void shouldFindAllProductsBySellerIdAndKeyword() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstant.SORT_PRODUCTS_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
         Page<Product> page = new PageImpl<>(List.of(productA));
 
         when(productRepository.findAllBySellerIdAndKeyword(pageable, productA.getSeller().getId(), "Test product")).thenReturn(page);
         when(productMapper.toProductResponse(productA)).thenReturn(productResponseA);
 
-        PageResponse<ProductResponse> pageResponse = productService.findAllBySellerIdAndKeyword(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
-                AppConstant.SORT_PRODUCTS_BY, AppConstant.SORT_DIR, productA.getSeller().getId(), "Test product");
+        PageResponse<ProductResponse> pageResponse = productService.findAllBySellerIdAndKeyword(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR, productA.getSeller().getId(), "Test product");
 
         assertThat(pageResponse.getContent().size()).isEqualTo(1);
         assertThat(pageResponse.getContent().get(0)).isEqualTo(productResponseA);
@@ -330,17 +330,17 @@ public class ProductServiceTests {
 
     @Test
     public void shouldFindAllProductsByCategoryIdAndKeyword() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstant.SORT_PRODUCTS_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_PRODUCTS_BY).ascending() : Sort.by(AppConstants.SORT_PRODUCTS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
         Page<Product> page = new PageImpl<>(List.of(productB));
 
         when(productRepository.findAllByCategoryIdAndKeyword(pageable, productA.getCategory().getId(), "Test product",
                 userA.getId())).thenReturn(page);
         when(productMapper.toProductResponse(productB)).thenReturn(productResponseB);
 
-        PageResponse<ProductResponse> pageResponse = productService.findAllByCategoryIdAndKeyword(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
-                AppConstant.SORT_PRODUCTS_BY, AppConstant.SORT_DIR, productA.getCategory().getId(), "Test product", authentication);
+        PageResponse<ProductResponse> pageResponse = productService.findAllByCategoryIdAndKeyword(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR, productA.getCategory().getId(), "Test product", authentication);
 
         assertThat(pageResponse.getContent().size()).isEqualTo(1);
         assertThat(pageResponse.getContent().get(0)).isEqualTo(productResponseB);

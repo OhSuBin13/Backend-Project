@@ -2,9 +2,9 @@ package com.osb.shopapp.common;
 
 import java.util.Set;
 
-public final class AppConstant {
+public final class AppConstants {
 
-    private AppConstant() {
+    private AppConstants() {
         throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
 

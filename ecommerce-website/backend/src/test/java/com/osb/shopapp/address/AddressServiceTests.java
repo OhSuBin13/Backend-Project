@@ -1,7 +1,7 @@
 package com.osb.shopapp.address;
 
 import com.osb.shopapp.TestDataUtils;
-import com.osb.shopapp.common.AppConstant;
+import com.osb.shopapp.common.AppConstants;
 import com.osb.shopapp.common.PageResponse;
 import com.osb.shopapp.exception.OperationNotPermittedException;
 import com.osb.shopapp.exception.ResourceNotFoundException;
@@ -85,9 +85,9 @@ public class AddressServiceTests {
 
     @Test
     public void shouldFindAllAddress() {
-        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
-                Sort.by(AppConstant.SORT_ADDRESSES_BY).ascending() : Sort.by(AppConstant.SORT_ADDRESSES_BY).descending();
-        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Sort sort = AppConstants.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstants.SORT_ADDRESSES_BY).ascending() : Sort.by(AppConstants.SORT_ADDRESSES_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT, sort);
         Page<Address> page = new PageImpl<>(List.of(addressA, addressB));
 
         when(addressRepository.findAll(pageable)).thenReturn(page);
@@ -95,8 +95,8 @@ public class AddressServiceTests {
         when(addressMapper.toAddressResponse(addressB)).thenReturn(addressResponseB);
 
         PageResponse<AddressResponse> pageResponse =
-                addressService.findAll(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
-                        AppConstant.SORT_ADDRESSES_BY, AppConstant.SORT_DIR);
+                addressService.findAll(AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                        AppConstants.SORT_ADDRESSES_BY, AppConstants.SORT_DIR);
 
         assertThat(pageResponse).isNotNull();
         assertThat(pageResponse.getContent().size()).isEqualTo(2);

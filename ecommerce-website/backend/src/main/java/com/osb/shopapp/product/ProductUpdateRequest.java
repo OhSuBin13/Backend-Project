@@ -6,8 +6,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
-import static com.osb.shopapp.common.AppConstant.MAX_PRODUCT_PRICE;
-import static com.osb.shopapp.common.AppConstant.MAX_PRODUCT_QUANTITY;
+import static com.osb.shopapp.common.AppConstants.MAX_PRODUCT_PRICE;
+import static com.osb.shopapp.common.AppConstants.MAX_PRODUCT_QUANTITY;
 
 @Getter
 @Setter

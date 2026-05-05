@@ -2,7 +2,7 @@ package com.osb.shopapp.address;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.osb.shopapp.TestDataUtils;
-import com.osb.shopapp.common.AppConstant;
+import com.osb.shopapp.common.AppConstants;
 import com.osb.shopapp.common.PageResponse;
 import com.osb.shopapp.configuration.TestConfig;
 import com.osb.shopapp.token.JwtFilter;
@@ -94,14 +94,14 @@ public class AddressControllerTests {
     public void shouldFindAllAddresses() throws Exception {
         PageResponse<AddressResponse> pageResponse = new PageResponse<>(
                 List.of(addressResponseA, addressResponseB),
-                AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                 2, 1,
                 true, true
         );
 
         when(addressService.findAll(
-                AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
-                AppConstant.SORT_ADDRESSES_BY, AppConstant.SORT_DIR
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                AppConstants.SORT_ADDRESSES_BY, AppConstants.SORT_DIR
         )).thenReturn(pageResponse);
 
         MvcResult mvcResult = mockMvc.perform(get("/api/addresses")

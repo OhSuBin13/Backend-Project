@@ -1,6 +1,6 @@
 package com.osb.shopapp.address;
 
-import com.osb.shopapp.common.AppConstant;
+import com.osb.shopapp.common.AppConstants;
 import com.osb.shopapp.common.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,10 +29,10 @@ public class AddressController {
 
     @GetMapping("/addresses")
     public ResponseEntity<PageResponse<AddressResponse>> findAll(
-            @RequestParam(name = "pageNumber", defaultValue = AppConstant.PAGE_NUMBER, required = false) Integer pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = AppConstant.PAGE_SIZE, required = false) Integer pageSize,
-            @RequestParam(name = "sortBy", defaultValue = AppConstant.SORT_ADDRESSES_BY, required = false) String sortBy,
-            @RequestParam(name = "sortDirection", defaultValue = AppConstant.SORT_DIR, required = false) String sortDirection
+            @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
+            @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_ADDRESSES_BY, required = false) String sortBy,
+            @RequestParam(name = "sortDirection", defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection
     ) {
         PageResponse<AddressResponse> foundAddresses = addressService.findAll(pageNumber, pageSize, sortBy, sortDirection);
         return new ResponseEntity<>(foundAddresses, HttpStatus.OK);

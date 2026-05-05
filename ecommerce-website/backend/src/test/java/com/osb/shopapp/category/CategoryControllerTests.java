@@ -2,7 +2,7 @@ package com.osb.shopapp.category;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.osb.shopapp.TestDataUtils;
-import com.osb.shopapp.common.AppConstant;
+import com.osb.shopapp.common.AppConstants;
 import com.osb.shopapp.configuration.TestConfig;
 import com.osb.shopapp.token.JwtFilter;
 import org.junit.jupiter.api.BeforeEach;
@@ -107,7 +107,7 @@ public class CategoryControllerTests {
                 List.of(categoryResponseA, categoryResponseB);
 
         when(categoryService.findAll(
-                AppConstant.SORT_CATEGORIES_BY, AppConstant.SORT_DIR
+                AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR
         )).thenReturn(categoryResponses);
 
         MvcResult mvcResult = mockMvc.perform(get("/api/categories")
@@ -123,7 +123,7 @@ public class CategoryControllerTests {
                 List.of(categoryResponseA, categoryResponseB);
 
         when(categoryService.findAllByKeyword(
-                AppConstant.SORT_CATEGORIES_BY, AppConstant.SORT_DIR, "test product"
+                AppConstants.SORT_CATEGORIES_BY, AppConstants.SORT_DIR, "test product"
         )).thenReturn(categoryResponses);
 
         MvcResult mvcResult = mockMvc.perform(get("/api/categories?search=test product")

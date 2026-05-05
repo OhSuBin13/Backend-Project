@@ -3,7 +3,7 @@ package com.osb.shopapp.product;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.osb.shopapp.TestDataUtils;
 import com.osb.shopapp.category.CategoryResponse;
-import com.osb.shopapp.common.AppConstant;
+import com.osb.shopapp.common.AppConstants;
 import com.osb.shopapp.common.PageResponse;
 import com.osb.shopapp.configuration.TestConfig;
 import com.osb.shopapp.role.Role;
@@ -138,14 +138,14 @@ public class ProductControllerTests {
     public void shouldFindAllProducts() throws Exception {
         PageResponse<ProductResponse> pageResponse = new PageResponse<>(
                 List.of(productResponseA, productResponseB),
-                AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                 2, 1,
                 true, true
         );
 
         when(productService.findAll(
-                AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
-                AppConstant.SORT_PRODUCTS_BY, AppConstant.SORT_DIR
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR
         )).thenReturn(pageResponse);
 
         MvcResult mvcResult = mockMvc.perform(get("/api/products"))
@@ -160,14 +160,14 @@ public class ProductControllerTests {
     public void shouldFindAllProductsByKeyword() throws Exception {
         PageResponse<ProductResponse> pageResponse = new PageResponse<>(
                 List.of(productResponseA, productResponseB),
-                AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                 2, 1,
                 true, true
         );
 
         when(productService.findAllByKeyword(
-                AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
-                AppConstant.SORT_PRODUCTS_BY, AppConstant.SORT_DIR, "Test product"
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR, "Test product"
         )).thenReturn(pageResponse);
 
         MvcResult mvcResult = mockMvc.perform(get("/api/products?search=Test product"))
@@ -182,14 +182,14 @@ public class ProductControllerTests {
     public void shouldFindAllProductsExceptSellerProducts() throws Exception {
         PageResponse<ProductResponse> pageResponse = new PageResponse<>(
                 List.of(productResponseB),
-                AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                 1, 1,
                 true, true
         );
 
         when(productService.findAllExceptSellerProducts(
-                eq(AppConstant.PAGE_NUMBER_INT), eq(AppConstant.PAGE_SIZE_INT),
-                eq(AppConstant.SORT_PRODUCTS_BY), eq(AppConstant.SORT_DIR), any(Authentication.class)
+                eq(AppConstants.PAGE_NUMBER_INT), eq(AppConstants.PAGE_SIZE_INT),
+                eq(AppConstants.SORT_PRODUCTS_BY), eq(AppConstants.SORT_DIR), any(Authentication.class)
         )).thenReturn(pageResponse);
 
         MvcResult mvcResult = mockMvc.perform(get("/api/products/others"))
@@ -204,14 +204,14 @@ public class ProductControllerTests {
     public void shouldFindAllProductsByKeywordExceptSellerProducts() throws Exception {
         PageResponse<ProductResponse> pageResponse = new PageResponse<>(
                 List.of(productResponseB),
-                AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                 1, 1,
                 true, true
         );
 
         when(productService.findAllByExceptSellerProductByKeyword(
-                eq(AppConstant.PAGE_NUMBER_INT), eq(AppConstant.PAGE_SIZE_INT),
-                eq(AppConstant.SORT_PRODUCTS_BY), eq(AppConstant.SORT_DIR),
+                eq(AppConstants.PAGE_NUMBER_INT), eq(AppConstants.PAGE_SIZE_INT),
+                eq(AppConstants.SORT_PRODUCTS_BY), eq(AppConstants.SORT_DIR),
                 eq("Test product"), any(Authentication.class)
         )).thenReturn(pageResponse);
 
@@ -227,14 +227,14 @@ public class ProductControllerTests {
     public void shouldFindAllProductsBySellerId() throws Exception {
         PageResponse<ProductResponse> pageResponse = new PageResponse<>(
                 List.of(productResponseA),
-                AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                 1, 1,
                 true, true
         );
 
         when(productService.findAllBySellerId(
-                AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
-                AppConstant.SORT_PRODUCTS_BY, AppConstant.SORT_DIR,
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
+                AppConstants.SORT_PRODUCTS_BY, AppConstants.SORT_DIR,
                 productResponseA.getSeller().getId()
         )).thenReturn(pageResponse);
 
@@ -250,14 +250,14 @@ public class ProductControllerTests {
     public void shouldFindAllProductsBySellerIdAndKeyword() throws Exception {
         PageResponse<ProductResponse> pageResponse = new PageResponse<>(
                 List.of(productResponseA),
-                AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                 1, 1,
                 true, true
         );
 
         when(productService.findAllBySellerIdAndKeyword(
-                eq(AppConstant.PAGE_NUMBER_INT), eq(AppConstant.PAGE_SIZE_INT),
-                eq(AppConstant.SORT_PRODUCTS_BY), eq(AppConstant.SORT_DIR),
+                eq(AppConstants.PAGE_NUMBER_INT), eq(AppConstants.PAGE_SIZE_INT),
+                eq(AppConstants.SORT_PRODUCTS_BY), eq(AppConstants.SORT_DIR),
                 eq(productResponseA.getSeller().getId()), eq("Test product")
         )).thenReturn(pageResponse);
 
@@ -274,14 +274,14 @@ public class ProductControllerTests {
     public void shouldFindAllProductsByCategoryId() throws Exception {
         PageResponse<ProductResponse> pageResponse = new PageResponse<>(
                 List.of(productResponseB),
-                AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                 1, 1,
                 true, true
         );
 
         when(productService.findAllByCategoryId(
-                eq(AppConstant.PAGE_NUMBER_INT), eq(AppConstant.PAGE_SIZE_INT),
-                eq(AppConstant.SORT_PRODUCTS_BY), eq(AppConstant.SORT_DIR),
+                eq(AppConstants.PAGE_NUMBER_INT), eq(AppConstants.PAGE_SIZE_INT),
+                eq(AppConstants.SORT_PRODUCTS_BY), eq(AppConstants.SORT_DIR),
                 eq(productRequestA.getCategoryId()), any(Authentication.class)
         )).thenReturn(pageResponse);
 
@@ -298,14 +298,14 @@ public class ProductControllerTests {
     public void shouldFindAllProductsByCategoryIdAndKeyword() throws Exception {
         PageResponse<ProductResponse> pageResponse = new PageResponse<>(
                 List.of(productResponseB),
-                AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
+                AppConstants.PAGE_NUMBER_INT, AppConstants.PAGE_SIZE_INT,
                 1, 1,
                 true, true
         );
 
         when(productService.findAllByCategoryIdAndKeyword(
-                eq(AppConstant.PAGE_NUMBER_INT), eq(AppConstant.PAGE_SIZE_INT),
-                eq(AppConstant.SORT_PRODUCTS_BY), eq(AppConstant.SORT_DIR),
+                eq(AppConstants.PAGE_NUMBER_INT), eq(AppConstants.PAGE_SIZE_INT),
+                eq(AppConstants.SORT_PRODUCTS_BY), eq(AppConstants.SORT_DIR),
                 eq(productRequestA.getCategoryId()), eq("Test product"), any(Authentication.class)
         )).thenReturn(pageResponse);
 

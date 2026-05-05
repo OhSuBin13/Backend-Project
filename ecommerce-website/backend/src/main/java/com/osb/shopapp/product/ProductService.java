@@ -25,7 +25,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 
-import static com.osb.shopapp.common.AppConstant.*;
+import static com.osb.shopapp.common.AppConstants.*;
 
 @Service
 @RequiredArgsConstructor
