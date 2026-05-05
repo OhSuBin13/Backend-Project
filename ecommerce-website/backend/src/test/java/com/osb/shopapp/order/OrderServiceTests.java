@@ -1,0 +1,584 @@
+package com.osb.shopapp.order;
+
+import com.osb.shopapp.TestDataUtils;
+import com.osb.shopapp.address.Address;
+import com.osb.shopapp.address.AddressRepository;
+import com.osb.shopapp.address.AddressResponse;
+import com.osb.shopapp.cart.CartItem;
+import com.osb.shopapp.cart.CartItemRepository;
+import com.osb.shopapp.category.Category;
+import com.osb.shopapp.category.CategoryResponse;
+import com.osb.shopapp.common.AppConstant;
+import com.osb.shopapp.common.PageResponse;
+import com.osb.shopapp.email.EmailService;
+import com.osb.shopapp.exception.APIException;
+import com.osb.shopapp.exception.OperationNotPermittedException;
+import com.osb.shopapp.exception.ResourceNotFoundException;
+import com.osb.shopapp.file.FileService;
+import com.osb.shopapp.product.Product;
+import com.osb.shopapp.product.ProductImage;
+import com.osb.shopapp.product.ProductResponse;
+import com.osb.shopapp.role.Role;
+import com.osb.shopapp.user.User;
+import com.osb.shopapp.user.UserRepository;
+import com.osb.shopapp.user.UserResponse;
+import com.stripe.exception.StripeException;
+import com.stripe.model.Event;
+import com.stripe.model.EventDataObjectDeserializer;
+import com.stripe.model.PaymentIntent;
+import com.stripe.model.PaymentMethod;
+import com.stripe.model.checkout.Session;
+import com.stripe.net.Webhook;
+import com.stripe.param.checkout.SessionCreateParams;
+import jakarta.mail.MessagingException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+public class OrderServiceTests {
+
+    private static final String WEBHOOK_SECRET = "secret";
+
+    @Mock
+    private OrderRepository orderRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private AddressRepository addressRepository;
+
+    @Mock
+    private CartItemRepository cartItemRepository;
+
+    @Mock
+    private OrderMapper orderMapper;
+
+    @Mock
+    private EmailService emailService;
+
+    @Mock
+    private FileService fileService;
+
+    @Mock
+    private AsyncFulfilmentService asyncFulfilmentService;
+
+    @InjectMocks
+    private OrderService orderService;
+
+    private CartItem cartItemA;
+    private Address addressA;
+    private Address addressB;
+    private Order orderA;
+    private Order orderB;
+    private OrderRequest orderRequestA;
+    private OrderResponse orderResponseA;
+    private OrderResponse orderResponseB;
+    private User userA;
+    private Authentication authentication;
+
+    @BeforeEach
+    public void setUp() {
+        // Mock external properties for field annotated with @Value
+        ReflectionTestUtils.setField(orderService, "webhookSecret", WEBHOOK_SECRET);
+
+        // Initialize test objects
+        Role adminRole = new Role(1, "ADMIN");
+        Role userRole = new Role(2, "USER");
+        userA = TestDataUtils.createUserA(Set.of(adminRole));
+        User userB = TestDataUtils.createUserB(Set.of(userRole));
+        UserResponse userResponseA = TestDataUtils.createUserResponseA(Set.of(adminRole));
+        UserResponse userResponseB = TestDataUtils.createUserResponseB(Set.of(userRole));
+
+        Category category = TestDataUtils.createCategoryA();
+        Product productA = TestDataUtils.createProductA(category, userA);
+        Product productB = TestDataUtils.createProductB(category, userB);
+        CategoryResponse categoryResponse = TestDataUtils.createCategoryResponseA();
+        ProductResponse productResponseA = TestDataUtils.createProductResponseA(categoryResponse, userResponseA);
+        ProductResponse productResponseB = TestDataUtils.createProductResponseB(categoryResponse, userResponseB);
+        productA.setImages(List.of(new ProductImage(1, "image.jpeg", "image/jpeg", "/path")));
+        cartItemA = new CartItem(1, productA, productA.getAvailableQuantity(), userA, ZonedDateTime.now());
+
+        addressA = TestDataUtils.createAddressA(userA);
+        addressB = TestDataUtils.createAddressB(userB);
+        orderA = TestDataUtils.createOrderA(userA, addressA, productB);
+        orderB = TestDataUtils.createOrderB(userB, addressB, productA);
+        orderRequestA = TestDataUtils.createOrderRequestA(addressA.getId());
+        AddressResponse addressResponseA = TestDataUtils.createAddressResponseA(userA.getId());
+        AddressResponse addressResponseB = TestDataUtils.createAddressResponseB(userB.getId());
+        orderResponseA = TestDataUtils.createOrderResponseA(addressResponseA, userResponseA, productResponseB);
+        orderResponseB = TestDataUtils.createOrderResponseB(addressResponseB, userResponseB, productResponseA);
+
+        authentication = new UsernamePasswordAuthenticationToken(
+                userA, userA.getPassword(), userA.getAuthorities()
+        );
+    }
+
+    @Test
+    public void shouldSaveOrderWhenValidRequest(
+            @Mock Session session,
+            @Captor ArgumentCaptor<SessionCreateParams> sessionParamsCaptor,
+            @Captor ArgumentCaptor<Order> orderCaptor
+    ) throws IOException, StripeException {
+        when(userRepository.findWithAssociationById(userA.getId())).thenReturn(Optional.of(userA));
+        when(addressRepository.findWithAssociationById(orderRequestA.getBillingAddressId()))
+                .thenReturn(Optional.of(addressA));
+        when(addressRepository.findWithAssociationById(orderRequestA.getDeliveryAddressId()))
+                .thenReturn(Optional.of(addressA));
+        when(cartItemRepository.findAllWithProductDetailsByUserId(userA.getId())).thenReturn(List.of(cartItemA));
+        when(fileService.readFileFromPath(cartItemA.getProduct().getImages().get(0).getImagePath())).thenReturn(new byte[1]);
+        when(fileService.saveOrderItemImage(
+                any(byte[].class),
+                eq(cartItemA.getProduct().getImages().get(0).getName()),
+                eq(cartItemA.getProduct().getId()))
+        ).thenReturn("path");
+        when(orderRepository.save(any(Order.class))).thenReturn(orderA);
+        when(session.getUrl()).thenReturn("url");
+        when(session.getId()).thenReturn("sessionId");
+
+        try (MockedStatic<Session> sessionStatic = mockStatic(Session.class)) {
+            sessionStatic.when(() -> Session.create(sessionParamsCaptor.capture())).thenReturn(session);
+
+            Map<String, String> result = orderService.save(orderRequestA, authentication);
+
+            assertThat(result.get("redirectUrl")).isEqualTo("url");
+            assertThat(result.get("orderId")).isEqualTo(orderA.getId().toString());
+            verify(orderRepository).save(orderCaptor.capture());
+        }
+
+        SessionCreateParams sessionCreateParams = sessionParamsCaptor.getValue();
+        assertThat(sessionCreateParams.getLineItems().get(0).getPriceData().getUnitAmountDecimal())
+                .isEqualTo(cartItemA.getProduct().getPrice().multiply(BigDecimal.valueOf(100)));
+        assertThat(sessionCreateParams.getLineItems().get(0).getQuantity())
+                .isEqualTo(cartItemA.getQuantity().longValue());
+        assertThat(sessionCreateParams.getLineItems().get(0).getPriceData().getProductData().getName())
+                .isEqualTo(cartItemA.getProduct().getName());
+
+        Order order = orderCaptor.getValue();
+        assertThat(order.getPlacedAt()).isNotNull();
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING_PAYMENT);
+        assertThat(order.getBuyer()).isEqualTo(userA);
+        assertThat(order.getBillingAddress()).isEqualTo(addressA.getFullAddress());
+        assertThat(order.getDeliveryAddress()).isEqualTo(addressA.getFullAddress());
+        assertThat(order.getStripeCheckoutId()).isEqualTo("sessionId");
+
+        assertThat(order.getOrderItems().size()).isEqualTo(1);
+        OrderItem orderItem = order.getOrderItems().get(0);
+        assertThat(orderItem.getStatus()).isEqualTo(OrderItemStatus.PENDING_PAYMENT);
+        assertThat(orderItem.getProduct()).isEqualTo(cartItemA.getProduct());
+        assertThat(orderItem.getProductQuantity()).isEqualTo(cartItemA.getQuantity());
+        assertThat(orderItem.getProductName()).isEqualTo(cartItemA.getProduct().getName());
+        assertThat(orderItem.getProductPrice()).isEqualTo(cartItemA.getProduct().getPrice());
+        assertThat(orderItem.getProductCondition()).isEqualTo(cartItemA.getProduct().getCondition());
+        assertThat(orderItem.getProductImagePath()).isEqualTo("path");
+    }
+
+    @Test
+    public void shouldNotSaveOrderWhenInvalidBillingAddressId() {
+        orderRequestA.setBillingAddressId(99);
+
+        when(userRepository.findWithAssociationById(userA.getId())).thenReturn(Optional.of(userA));
+        when(addressRepository.findWithAssociationById(orderRequestA.getBillingAddressId()))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> orderService.save(orderRequestA, authentication))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No billing address found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotSaveOrderWhenInvalidDeliveryAddressId() {
+        orderRequestA.setDeliveryAddressId(99);
+
+        when(userRepository.findWithAssociationById(userA.getId())).thenReturn(Optional.of(userA));
+        when(addressRepository.findWithAssociationById(orderRequestA.getBillingAddressId()))
+                .thenReturn(Optional.of(addressA));
+        when(addressRepository.findWithAssociationById(orderRequestA.getDeliveryAddressId()))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> orderService.save(orderRequestA, authentication))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No delivery address found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotSaveOrderWhenAddressBelongsToDifferentUser() {
+        orderRequestA.setBillingAddressId(addressB.getId());
+
+        when(userRepository.findWithAssociationById(userA.getId())).thenReturn(Optional.of(userA));
+        when(addressRepository.findWithAssociationById(orderRequestA.getDeliveryAddressId()))
+                .thenReturn(Optional.of(addressB));
+        when(addressRepository.findWithAssociationById(orderRequestA.getBillingAddressId()))
+                .thenReturn(Optional.of(addressB));
+
+        assertThatThrownBy(() -> orderService.save(orderRequestA, authentication))
+                .isInstanceOf(APIException.class)
+                .hasMessage("One or both of the specified address are related to another user");
+    }
+
+    @Test
+    public void shouldNotSaveOrderWhenUserCartIsEmpty() {
+        when(userRepository.findWithAssociationById(userA.getId())).thenReturn(Optional.of(userA));
+        when(addressRepository.findWithAssociationById(orderRequestA.getBillingAddressId()))
+                .thenReturn(Optional.of(addressA));
+        when(addressRepository.findWithAssociationById(orderRequestA.getDeliveryAddressId()))
+                .thenReturn(Optional.of(addressA));
+        when(cartItemRepository.findAllWithProductDetailsByUserId(userA.getId()))
+                .thenReturn(List.of());
+
+        assertThatThrownBy(() -> orderService.save(orderRequestA, authentication))
+                .isInstanceOf(APIException.class)
+                .hasMessage("You do not have any items in your cart");
+    }
+
+    @Test
+    public void shouldNotSaveOrderWhenInvalidCartItemQuantity() {
+        cartItemA.setQuantity(99);
+
+        when(userRepository.findWithAssociationById(userA.getId())).thenReturn(Optional.of(userA));
+        when(addressRepository.findWithAssociationById(orderRequestA.getBillingAddressId()))
+                .thenReturn(Optional.of(addressA));
+        when(addressRepository.findWithAssociationById(orderRequestA.getDeliveryAddressId()))
+                .thenReturn(Optional.of(addressA));
+        when(cartItemRepository.findAllWithProductDetailsByUserId(userA.getId()))
+                .thenReturn(List.of(cartItemA));
+
+        assertThatThrownBy(() -> orderService.save(orderRequestA, authentication))
+                .isInstanceOf(APIException.class)
+                .hasMessage("Requested quantity of product with ID '" + cartItemA.getProduct().getId() +
+                        "' cannot be larger than available quantity");
+    }
+
+    @Test
+    public void shouldHandleCheckoutCompletedStripeEventWhenValidRequest(
+            @Mock Event event, @Mock Session session, @Mock EventDataObjectDeserializer eventDataObjectDeserializer,
+            @Mock PaymentIntent paymentIntent, @Mock PaymentMethod paymentMethod
+    ) throws StripeException, MessagingException {
+        Integer initialQuantity = orderA.getOrderItems().get(0).getProduct().getAvailableQuantity();
+        String payload = "payload";
+        String sigHeader = "sigHeader";
+        orderA.setStatus(OrderStatus.PENDING_PAYMENT);
+        orderA.getOrderItems().get(0).setStatus(OrderItemStatus.PENDING_PAYMENT);
+
+        try (MockedStatic<Webhook> webhookStatic = mockStatic(Webhook.class);
+             MockedStatic<Session> sessionStatic = mockStatic(Session.class);
+             MockedStatic<PaymentIntent> paymentIntentStatic = mockStatic(PaymentIntent.class);
+             MockedStatic<PaymentMethod> paymentMethodStatic = mockStatic(PaymentMethod.class);
+        ) {
+            webhookStatic.when(() -> Webhook.constructEvent(payload, sigHeader, WEBHOOK_SECRET)).thenReturn(event);
+            when(event.getType()).thenReturn("checkout.session.completed");
+            when(event.getDataObjectDeserializer()).thenReturn(eventDataObjectDeserializer);
+            when(eventDataObjectDeserializer.getObject()).thenReturn(Optional.of(session));
+            when(session.getId()).thenReturn(orderA.getStripeCheckoutId());
+            when(orderRepository.findWithProductsAndBuyerDetailsByStripeCheckoutId(orderA.getStripeCheckoutId()))
+                    .thenReturn(Optional.of(orderA));
+            sessionStatic.when(() -> Session.retrieve(orderA.getStripeCheckoutId()))
+                    .thenReturn(session);
+            when(session.getPaymentIntent()).thenReturn("paymentIntentId");
+            paymentIntentStatic.when(() -> PaymentIntent.retrieve("paymentIntentId"))
+                    .thenReturn(paymentIntent);
+            when(paymentIntent.getPaymentMethod()).thenReturn("paymentMethodId");
+            paymentMethodStatic.when(() -> PaymentMethod.retrieve("paymentMethodId"))
+                    .thenReturn(paymentMethod);
+            when(paymentMethod.getType()).thenReturn("cash");
+
+            String response = orderService.handleStripeEvent(payload, sigHeader);
+
+            assertThat(response).isEqualTo("success");
+            verify(asyncFulfilmentService, times(1))
+                    .finalizeOrder(orderA, List.of(orderA.getOrderItems().get(0).getProduct()));
+        }
+
+        verify(paymentIntent, times(1)).capture();
+        assertThat(orderA.getOrderItems().get(0).getProduct().getAvailableQuantity())
+                .isEqualTo(initialQuantity - orderA.getOrderItems().get(0).getProductQuantity());
+        assertThat(orderA.getOrderItems().get(0).getStatus()).isEqualTo(OrderItemStatus.PENDING_SHIPMENT);
+        assertThat(orderA.getStatus()).isEqualTo(OrderStatus.PAID);
+        assertThat(orderA.getPaymentMethod()).isEqualTo("cash");
+    }
+
+    @Test
+    public void shouldNotFulfillOrderWhenInvalidStripeSessionId() {
+        when(orderRepository.findWithProductsAndBuyerDetailsByStripeCheckoutId(orderA.getStripeCheckoutId()))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> orderService.fulfillOrder(orderA.getStripeCheckoutId()))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No order found with Stripe session ID: " + orderA.getStripeCheckoutId());
+    }
+
+    @Test
+    public void shouldNotFulfillOrderWhenOrderAlreadyFulfilled() throws StripeException, MessagingException {
+        Integer initialQuantity = orderA.getOrderItems().get(0).getProduct().getAvailableQuantity();
+        orderA.setStatus(OrderStatus.PAID);
+
+        when(orderRepository.findWithProductsAndBuyerDetailsByStripeCheckoutId(orderA.getStripeCheckoutId()))
+                .thenReturn(Optional.of(orderA));
+
+        orderService.fulfillOrder(orderA.getStripeCheckoutId());
+
+        assertThat(orderA.getOrderItems().get(0).getProduct().getAvailableQuantity())
+                .isEqualTo(initialQuantity);
+    }
+
+    @Test
+    public void shouldNotFulfillOrderWhenProductIsDeleted(@Mock Session session) throws MessagingException {
+        orderA.setStatus(OrderStatus.PENDING_PAYMENT);
+        orderA.getOrderItems().get(0).getProduct().setIsDeleted(true);
+
+        when(orderRepository.findWithProductsAndBuyerDetailsByStripeCheckoutId(orderA.getStripeCheckoutId()))
+                .thenReturn(Optional.of(orderA));
+
+        try (MockedStatic<Session> sessionStatic = mockStatic(Session.class)) {
+            sessionStatic.when(() -> Session.retrieve(orderA.getStripeCheckoutId())).thenReturn(session);
+
+            assertThatThrownBy(() -> orderService.fulfillOrder(orderA.getStripeCheckoutId()))
+                    .isInstanceOf(APIException.class)
+                    .hasMessage("Product with ID '" + orderA.getOrderItems().get(0).getProduct().getId() +
+                            "' does not have the required stock");
+        }
+
+        verify(emailService, times(1))
+                .sendOrderCancellationEmail(
+                        orderA.getBuyer().getEmail(),
+                        orderA,
+                        orderA.getOrderItems().get(0).getProduct(),
+                        orderA.getOrderItems().get(0).getProductQuantity()
+                );
+    }
+
+    @Test
+    public void shouldFindAllOrders() {
+        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstant.SORT_ORDERS_BY).ascending() : Sort.by(AppConstant.SORT_ORDERS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Page<Order> page = new PageImpl<>(List.of(orderA, orderB));
+
+        when(orderRepository.findAll(pageable)).thenReturn(page);
+        when(orderMapper.toOrderResponse(orderA)).thenReturn(orderResponseA);
+        when(orderMapper.toOrderResponse(orderB)).thenReturn(orderResponseB);
+
+        PageResponse<OrderResponse> pageResponse =
+                orderService.findAll(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
+                        AppConstant.SORT_ORDERS_BY, AppConstant.SORT_DIR);
+
+        assertThat(pageResponse.getContent()).isNotNull();
+        assertThat(pageResponse.getTotalElement()).isEqualTo(2);
+        assertThat(pageResponse.getContent().get(0)).isEqualTo(orderResponseA);
+        assertThat(pageResponse.getContent().get(1)).isEqualTo(orderResponseB);
+    }
+
+    @Test
+    public void shouldFindAllOrdersByBuyerIdWhenValidRequest() {
+        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstant.SORT_ORDERS_BY).ascending() : Sort.by(AppConstant.SORT_ORDERS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Page<Order> page = new PageImpl<>(List.of(orderA));
+
+        when(orderRepository.findAllPaidByBuyerId(pageable, userA.getId())).thenReturn(page);
+        when(orderMapper.toOrderResponse(orderA)).thenReturn(orderResponseA);
+
+        PageResponse<OrderResponse> pageResponse =
+                orderService.findAllByBuyerId(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
+                        AppConstant.SORT_ORDERS_BY, AppConstant.SORT_DIR, userA.getId(), authentication);
+
+        assertThat(pageResponse.getContent()).isNotNull();
+        assertThat(pageResponse.getTotalElement()).isEqualTo(1);
+        assertThat(pageResponse.getContent().get(0)).isEqualTo(orderResponseA);
+    }
+
+    @Test
+    public void shouldNotFindAllOrdersByBuyerIdWhenBuyerIsNotLoggedIn() {
+        assertThatThrownBy(
+                () -> orderService.findAllByBuyerId(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
+                        AppConstant.SORT_ORDERS_BY, AppConstant.SORT_DIR, orderB.getBuyer().getId(), authentication)
+        ).isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to view the orders of this user");
+    }
+
+    @Test
+    public void shouldFindAllOrdersByProductSellerIdWhenValidRequest() {
+        Sort sort = AppConstant.SORT_DIR.equalsIgnoreCase("asc") ?
+                Sort.by(AppConstant.SORT_ORDERS_BY).ascending() : Sort.by(AppConstant.SORT_ORDERS_BY).descending();
+        Pageable pageable = PageRequest.of(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT, sort);
+        Page<Order> page = new PageImpl<>(List.of(orderB));
+
+        when(orderRepository.findAllPaidByProductSellerId(pageable, userA.getId())).thenReturn(page);
+        when(orderMapper.toOrderResponse(orderB)).thenReturn(orderResponseB);
+
+        PageResponse<OrderResponse> pageResponse =
+                orderService.findAllByProductSellerId(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
+                        AppConstant.SORT_ORDERS_BY, AppConstant.SORT_DIR, userA.getId(), authentication);
+
+        assertThat(pageResponse.getContent()).isNotNull();
+        assertThat(pageResponse.getTotalElement()).isEqualTo(1);
+        assertThat(pageResponse.getContent().get(0)).isEqualTo(orderResponseB);
+    }
+
+    @Test
+    public void shouldNotFindAllOrdersByProductSellerIdWhenSellerIsNotLoggedIn() {
+        assertThatThrownBy(
+                () -> orderService.findAllByProductSellerId(AppConstant.PAGE_NUMBER_INT, AppConstant.PAGE_SIZE_INT,
+                        AppConstant.SORT_ORDERS_BY, AppConstant.SORT_DIR, orderA.getOrderItems().get(0).getProductSeller().getId(), authentication)
+        ).isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to view the orders of this user");
+    }
+
+    @Test
+    public void shouldMarkOrderItemAsShippedWhenValidRequest() throws MessagingException {
+        when(orderRepository.findWithProductsAndBuyerDetailsById(orderB.getId()))
+                .thenReturn(Optional.of(orderB));
+
+        orderService.markOrderItemAsShipped(
+                orderB.getId(), orderB.getOrderItems().get(0).getProduct().getId(), authentication
+        );
+
+        assertThat(orderB.getOrderItems().get(0).getStatus()).isEqualTo(OrderItemStatus.SHIPPED);
+        verify(emailService, times(1))
+                .sendShippingConfirmationEmail(orderB.getBuyer().getEmail(), orderB);
+    }
+
+    @Test
+    public void shouldNotMarkedOrderItemAsShippedWhenInvalidOrderId() {
+        when(orderRepository.findWithProductsAndBuyerDetailsById(99))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(
+                () -> orderService.markOrderItemAsShipped(
+                        99, orderB.getOrderItems().get(0).getProduct().getId(), authentication)
+        ).isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No order found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsShippedWhenOrderIsNotPaid() {
+        orderB.setStatus(OrderStatus.PENDING_PAYMENT);
+        when(orderRepository.findWithProductsAndBuyerDetailsById(orderB.getId()))
+                .thenReturn(Optional.of(orderB));
+
+        assertThatThrownBy(
+                () -> orderService.markOrderItemAsShipped(
+                        orderB.getId(), orderB.getOrderItems().get(0).getProduct().getId(), authentication)
+        ).isInstanceOf(APIException.class)
+                .hasMessage("Order with ID: " + orderB.getId() + " has not been paid yet");
+    }
+
+    @Test
+    public void shouldNotMarkOderItemAsShippedWhenInvalidProductId() {
+        when(orderRepository.findWithProductsAndBuyerDetailsById(orderB.getId()))
+                .thenReturn(Optional.of(orderB));
+
+        assertThatThrownBy(() -> orderService.markOrderItemAsShipped(orderB.getId(), 99, authentication))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("The order does not include a product with ID: 99");
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsShippedWhenProductSellerIsNotLoggedIn() {
+        when(orderRepository.findWithProductsAndBuyerDetailsById(orderA.getId()))
+                .thenReturn(Optional.of(orderA));
+
+        assertThatThrownBy(
+                () -> orderService.markOrderItemAsShipped(
+                        orderA.getId(), orderA.getOrderItems().get(0).getProduct().getId(), authentication)
+        ).isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to mark this product as shipped");
+    }
+
+    @Test
+    public void shouldMarkOrderItemAsDeliveredWhenValidRequest() {
+        orderA.getOrderItems().get(0).setStatus(OrderItemStatus.SHIPPED);
+
+        when(orderRepository.findWithProductsAndBuyerDetailsById(orderA.getId()))
+                .thenReturn(Optional.of(orderA));
+
+        orderService.markOrderItemAsDelivered(
+                orderA.getId(), orderA.getOrderItems().get(0).getProduct().getId(), authentication
+        );
+
+        assertThat(orderA.getOrderItems().get(0).getStatus()).isEqualTo(OrderItemStatus.DELIVERED);
+    }
+
+    @Test
+    public void shouldNotMarkedOrderItemAsDeliveredWhenInvalidOrderId() {
+        when(orderRepository.findWithProductsAndBuyerDetailsById(99))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(
+                () -> orderService.markOrderItemAsDelivered(
+                        99, orderA.getOrderItems().get(0).getProduct().getId(), authentication)
+        ).isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No order found with ID: 99");
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsDeliveredWhenOrderIsNotPaid() {
+        orderA.setStatus(OrderStatus.PENDING_PAYMENT);
+        when(orderRepository.findWithProductsAndBuyerDetailsById(orderA.getId()))
+                .thenReturn(Optional.of(orderA));
+
+        assertThatThrownBy(
+                () -> orderService.markOrderItemAsDelivered(
+                        orderA.getId(), orderA.getOrderItems().get(0).getProduct().getId(), authentication)
+        ).isInstanceOf(APIException.class)
+                .hasMessage("Order with ID: " + orderA.getId() + " has not been paid yet");
+    }
+
+    @Test
+    public void shouldNotMarkOderItemAsDeliveredWhenInvalidProductId() {
+        when(orderRepository.findWithProductsAndBuyerDetailsById(orderA.getId()))
+                .thenReturn(Optional.of(orderA));
+
+        assertThatThrownBy(() -> orderService.markOrderItemAsDelivered(orderA.getId(), 99, authentication))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("The order does not include a product with ID: 99");
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsDeliveredWhenOrderItemIsNotShipped() {
+        when(orderRepository.findWithProductsAndBuyerDetailsById(orderA.getId()))
+                .thenReturn(Optional.of(orderA));
+
+        assertThatThrownBy(
+                () -> orderService.markOrderItemAsDelivered(
+                        orderA.getId(), orderA.getOrderItems().get(0).getId(), authentication)
+        ).isInstanceOf(APIException.class)
+                .hasMessage("Product with ID: " + orderA.getOrderItems().get(0).getId() + " has not been shipped");
+    }
+
+    @Test
+    public void shouldNotMarkOrderItemAsDeliveredWhenBuyerIsNotLoggedIn() {
+        orderB.getOrderItems().get(0).setStatus(OrderItemStatus.SHIPPED);
+
+        when(orderRepository.findWithProductsAndBuyerDetailsById(orderB.getId()))
+                .thenReturn(Optional.of(orderB));
+
+        assertThatThrownBy(
+                () -> orderService.markOrderItemAsDelivered(
+                        orderB.getId(), orderB.getOrderItems().get(0).getProduct().getId(), authentication)
+        ).isInstanceOf(OperationNotPermittedException.class)
+                .hasMessage("You do not have permission to mark this product as delivered");
+    }
+
+}

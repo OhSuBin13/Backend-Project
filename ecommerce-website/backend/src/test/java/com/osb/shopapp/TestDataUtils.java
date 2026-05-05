@@ -7,10 +7,7 @@ import com.osb.shopapp.address.AddressType;
 import com.osb.shopapp.category.Category;
 import com.osb.shopapp.category.CategoryRequest;
 import com.osb.shopapp.category.CategoryResponse;
-import com.osb.shopapp.order.Order;
-import com.osb.shopapp.order.OrderItem;
-import com.osb.shopapp.order.OrderItemStatus;
-import com.osb.shopapp.order.OrderStatus;
+import com.osb.shopapp.order.*;
 import com.osb.shopapp.product.Product;
 import com.osb.shopapp.product.ProductCondition;
 import com.osb.shopapp.product.ProductRequest;
@@ -320,6 +317,42 @@ public class TestDataUtils {
                 .build();
     }
 
+    public static OrderRequest createOrderRequestA(Integer addressId) {
+        return OrderRequest.builder()
+                .billingAddressId(addressId)
+                .deliveryAddressId(addressId)
+                .build();
+    }
+
+    public static OrderResponse createOrderResponseA(
+            AddressResponse addressResponse, UserResponse userResponse, ProductResponse orderProduct
+    ) {
+        OrderItemResponse orderItemResponse = OrderItemResponse.builder()
+                .id(1)
+                .status(OrderItemStatus.PENDING_SHIPMENT)
+                .productId(orderProduct.getId())
+                .productQuantity(orderProduct.getAvailableQuantity())
+                .productName(orderProduct.getName())
+                .productPrice(orderProduct.getPrice())
+                .productCondition(orderProduct.getCondition())
+                .productSeller(orderProduct.getSeller())
+                .build();
+
+        return OrderResponse.builder()
+                .id(1)
+                .placedAt(CURRENT_TIME)
+                .paymentMethod("cash")
+                .status(OrderStatus.PAID)
+                .stripeCheckoutId("stripe-id")
+                .billingAddress(addressResponse.getFullAddress())
+                .deliveryAddress(addressResponse.getFullAddress())
+                .total(orderProduct.getPreviousPrice()
+                        .multiply(BigDecimal.valueOf(orderProduct.getAvailableQuantity())))
+                .buyer(userResponse)
+                .orderItems(List.of(orderItemResponse))
+                .build();
+    }
+
     public static Order createOrderB(User buyer, Address address, Product orderProduct) {
         OrderItem orderItem = OrderItem.builder()
                 .id(2)
@@ -342,6 +375,35 @@ public class TestDataUtils {
                 .deliveryAddress(address.getFullAddress())
                 .buyer(buyer)
                 .orderItems(List.of(orderItem))
+                .build();
+    }
+
+    public static OrderResponse createOrderResponseB(
+            AddressResponse addressResponse, UserResponse userResponse, ProductResponse orderProduct
+    ) {
+        OrderItemResponse orderItemResponse = OrderItemResponse.builder()
+                .id(2)
+                .status(OrderItemStatus.PENDING_SHIPMENT)
+                .productId(orderProduct.getId())
+                .productQuantity(orderProduct.getAvailableQuantity())
+                .productName(orderProduct.getName())
+                .productPrice(orderProduct.getPrice())
+                .productCondition(orderProduct.getCondition())
+                .productSeller(orderProduct.getSeller())
+                .build();
+
+        return OrderResponse.builder()
+                .id(2)
+                .placedAt(CURRENT_TIME)
+                .paymentMethod("cash")
+                .status(OrderStatus.PAID)
+                .stripeCheckoutId("stripe-id-2")
+                .billingAddress(addressResponse.getFullAddress())
+                .deliveryAddress(addressResponse.getFullAddress())
+                .total(orderProduct.getPreviousPrice()
+                        .multiply(BigDecimal.valueOf(orderProduct.getAvailableQuantity())))
+                .buyer(userResponse)
+                .orderItems(List.of(orderItemResponse))
                 .build();
     }
 }
