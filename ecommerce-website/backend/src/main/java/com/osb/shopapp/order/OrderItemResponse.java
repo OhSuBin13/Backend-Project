@@ -1,5 +1,6 @@
 package com.osb.shopapp.order;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.osb.shopapp.product.ProductCondition;
 import com.osb.shopapp.user.UserResponse;
 import lombok.*;
@@ -11,6 +12,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderItemResponse {
 
     private Integer id;
