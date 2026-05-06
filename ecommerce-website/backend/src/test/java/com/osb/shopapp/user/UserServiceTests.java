@@ -377,7 +377,7 @@ public class UserServiceTests {
                 .thenReturn(List.of(cartItem));
         when(cartItemMapper.toCartItemResponse(cartItem)).thenReturn(cartItemResponse);
 
-        List<CartItemResponse> cartItemResponses = userService.findAlLCartItemsByUserId(userA.getId(), authentication);
+        List<CartItemResponse> cartItemResponses = userService.findAllCartItemsByUserId(userA.getId(), authentication);
 
         assertThat(cartItemResponses).hasSize(1);
         assertThat(cartItemResponses.get(0)).isEqualTo(cartItemResponse);
@@ -385,7 +385,7 @@ public class UserServiceTests {
 
     @Test
     public void shouldNotFindAllCartItemsByUserIdWhenCartOwnerIsNotLoggedIn() {
-        assertThatThrownBy(() -> userService.findAlLCartItemsByUserId(userB.getId(), authentication))
+        assertThatThrownBy(() -> userService.findAllCartItemsByUserId(userB.getId(), authentication))
                 .isInstanceOf(OperationNotPermittedException.class)
                 .hasMessage("You do not have permission to view this user's cart");
     }
@@ -545,7 +545,7 @@ public class UserServiceTests {
                 .thenReturn(List.of(wishListItem));
         when(wishListItemMapper.toWishListItemResponse(wishListItem)).thenReturn(wishListItemResponse);
 
-        List<WishListItemResponse> wishListItemResponses = userService.findAllWishListItemByUserId(userA.getId(), authentication);
+        List<WishListItemResponse> wishListItemResponses = userService.findAllWishListItemsByUserId(userA.getId(), authentication);
 
         assertThat(wishListItemResponses).hasSize(1);
         assertThat(wishListItemResponses.get(0)).isEqualTo(wishListItemResponse);
@@ -553,7 +553,7 @@ public class UserServiceTests {
 
     @Test
     public void shouldNotFindAllWishListItemsByUserIdWhenListOwnerIsNotLoggedIn() {
-        assertThatThrownBy(() -> userService.findAllWishListItemByUserId(userB.getId(), authentication))
+        assertThatThrownBy(() -> userService.findAllWishListItemsByUserId(userB.getId(), authentication))
                 .isInstanceOf(OperationNotPermittedException.class)
                 .hasMessage("You do not have permission to view this user's wishlist");
     }

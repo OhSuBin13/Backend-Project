@@ -218,7 +218,7 @@ public class UserService {
         return cartItemMapper.toCartItemResponse(savedCartItem);
     }
 
-    public List<CartItemResponse> findAlLCartItemsByUserId(Integer userId, Authentication authentication) {
+    public List<CartItemResponse> findAllCartItemsByUserId(Integer userId, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
 
         if (!Objects.equals(currentUser.getId(), userId))
@@ -302,7 +302,7 @@ public class UserService {
         return wishListItemMapper.toWishListItemResponse(savedWishListItem);
     }
 
-    public List<WishListItemResponse> findAllWishListItemByUserId(Integer userId, Authentication authentication) {
+    public List<WishListItemResponse> findAllWishListItemsByUserId(Integer userId, Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
 
         if (!Objects.equals(currentUser.getId(), userId))
